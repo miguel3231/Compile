@@ -15,9 +15,11 @@ namespace Compile
         public static int varCount = 0;
         public static String codigochilo = "";
         public static int codigoByteCount = 0;
+        public static int LCount = 1;
+        public static string JumpHelper = "";
         static void Main(string[] args)
         {
-            string line = " { int x x= 5 + 5 }";
+            string line = " { if(a==5){b=5}}";
             evaluate(line);
             Programa();
             Console.ReadLine();
@@ -352,6 +354,7 @@ namespace Compile
             codigoByteCount = 15;
             Token = tokensArray[tokenCount];
             Bloque();
+            Console.WriteLine("HALT");
         }
         public static void Bloque()
         {
@@ -377,67 +380,7 @@ namespace Compile
                 DoInstruction();
             }
         }
-        private static void DoInstruction()
-        {
-            if (Token.index == 9)
-            {
-                nextToken();
-                Match("OP");
-                PreparePrint();
-                Match("CP");
-                //Console.WriteLine("prtcr");
-            }
-        }
-        private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
-        {
-            switch (CheckVarTable())
-            {
-                case "char": // char
-                    Console.WriteLine("PRTC " + Token.valor);
-                    nextToken();
-                    break;
-                case "charArray":
-                    Console.WriteLine("PRTAC " + Token.valor);
-                    nextToken();
-                    break;
-                case "string": //String
-                    Console.WriteLine("PRTS " + Token.valor);
-                    nextToken();
-                    break;
-                case "stringArray":
-                    Console.WriteLine("PRTAS " + Token.valor);
-                    nextToken();
-                    break;
-                case "int": //int
-                    Console.WriteLine("PRTI " + Token.valor);
-                    nextToken();
-                    break;
-                case "intArray":
-                    Console.WriteLine("PRTAI " + Token.valor);
-                    nextToken();
-                    break;
-                case "float": //float
-                    Console.WriteLine("PRTF " + Token.valor);
-                    nextToken();
-                    break;
-                case "floatArray":
-                    Console.WriteLine("PRTAF " + Token.valor);
-                    nextToken();
-                    break;
-                case "double": //double
-                    Console.WriteLine("PRTD " + Token.valor);
-                    nextToken();
-                    break;
-                case "doubleArray":
-                    Console.WriteLine("PRTAD " + Token.valor);
-                    nextToken();
-                    break;
-                default:
-                    Console.WriteLine("Error. Variable no reconocida.");
-                    nextToken();
-                    break;
-            }
-        }
+        
         public static void DoDeclaration()
         {
             switch (Token.index)
@@ -585,7 +528,7 @@ namespace Compile
             Match("Eq");
             if (Token.index == 37 || Token.index == 50 || Token.index == 11)
             {
-                Expretion();
+                BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
             }
             else if (Token.index == 0)
@@ -601,6 +544,160 @@ namespace Compile
                 nextToken();
             }
 
+        }
+        private static void DoInstruction()
+        {
+            if (Token.index == 5) //if
+            {
+                nextToken();
+                Match("OP");
+                BoolExpretion();
+                Match("CP");
+                Console.WriteLine(JumpHelper + " L" +LCount);
+                Bloque();
+                Console.WriteLine("L" + LCount+":");
+                LCount++;
+
+            }
+            else if (Token.index == 9) //print
+            {
+                nextToken();
+                Match("OP");
+                PreparePrint();
+                Match("CP");
+                //Console.WriteLine("prtcr");
+            }
+        }
+        private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
+        {
+            switch (CheckVarTable())
+            {
+                case "char": // char
+                    Console.WriteLine("PRTC " + Token.valor);
+                    nextToken();
+                    break;
+                case "charArray":
+                    Console.WriteLine("PRTAC " + Token.valor);
+                    nextToken();
+                    break;
+                case "string": //String
+                    Console.WriteLine("PRTS " + Token.valor);
+                    nextToken();
+                    break;
+                case "stringArray":
+                    Console.WriteLine("PRTAS " + Token.valor);
+                    nextToken();
+                    break;
+                case "int": //int
+                    Console.WriteLine("PRTI " + Token.valor);
+                    nextToken();
+                    break;
+                case "intArray":
+                    Console.WriteLine("PRTAI " + Token.valor);
+                    nextToken();
+                    break;
+                case "float": //float
+                    Console.WriteLine("PRTF " + Token.valor);
+                    nextToken();
+                    break;
+                case "floatArray":
+                    Console.WriteLine("PRTAF " + Token.valor);
+                    nextToken();
+                    break;
+                case "double": //double
+                    Console.WriteLine("PRTD " + Token.valor);
+                    nextToken();
+                    break;
+                case "doubleArray":
+                    Console.WriteLine("PRTAD " + Token.valor);
+                    nextToken();
+                    break;
+                default:
+                    Console.WriteLine("Error. Variable no reconocida.");
+                    nextToken();
+                    break;
+            }
+        }
+        public static void BoolExpretion()
+        {
+            Comparison();
+            while(Token.index == 31 || Token.index == 32)
+            {
+                if(Token.index == 31)
+                {
+                    //pending, no idea what happens here
+                }
+                else if(Token.index == 32)
+                {
+                    //pending, no idea what happens here
+                }
+                else
+                {
+                    Console.WriteLine("Error. This shouldn't happen.");
+                }
+            }
+        }
+        public static void Comparison()
+        {
+            Expretion();
+            while(Token.index == 17 || //<
+                Token.index == 18 || //<=
+                Token.index == 19 || //>
+                Token.index == 20 || //>=
+                Token.index == 21 || //==
+                Token.index == 22) // !=
+            {
+                if(Token.index == 17)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPLT " ); 
+                    JumpHelper = "JMPGE"; //opuesto a la comparacion realizada
+                }
+                if (Token.index == 18)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPLE ");
+                    JumpHelper = "JMPGT";
+                }
+                if (Token.index == 19)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPGT ");
+                    JumpHelper = "JMPLE";
+
+                }
+                if (Token.index == 20)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPGE ");
+                    JumpHelper = "JMMPLT";
+                }
+                if (Token.index == 21)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPEQ ");
+                    JumpHelper = "JMPNE";
+                }
+                if (Token.index == 22)
+                {
+                    nextToken();
+                    Expretion();
+                    Console.WriteLine("CMP");
+                    //Console.WriteLine("JMPNE "); 
+                    JumpHelper = "JMPEQ";
+                }
+
+            }
         }
         public static void Expretion()
         {
