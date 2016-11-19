@@ -11,17 +11,20 @@ namespace Compile
         public static Tokens[] tokensArray = new Tokens[100];
         public static Tokens Token;
         public static int tokenCount = 0;
-        public static String[,] varTable = new String[100,2];
+        public static Variables[] varTable = new Variables[100];
         public static int varCount = 0;
-        public static String codigochilo = "";
+        public static string codigochilo = "";
         public static int codigoByteCount = 0;
         public static int LCount = 1;
         public static string JumpHelper = "";
+        public static int directionHelper = 0;
         static void Main(string[] args)
         {
             string line = " { if(a==5){b=5}}";
             evaluate(line);
             Programa();
+
+
             Console.ReadLine();
         }
         public static void evaluate(string expression)
@@ -388,11 +391,13 @@ namespace Compile
                 case 0: //char
                     //char
                     nextToken();
+                    varTable[varCount] = new Variables();
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFC " + Token.valor);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "char";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "char";
+                        varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -406,8 +411,9 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAC " + Token.valor + ", " + number);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "charArray";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "charArray";
+                        varTable[varCount].isArray = true;
                         varCount++;
                     }
                     break;
@@ -416,8 +422,9 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFS " + Token.valor + ", 50");
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "string";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount] .type= "string";
+                        varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -431,8 +438,9 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAS " + Token.valor + ", 50, " + number);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "stringArray";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "stringArray";
+                        varTable[varCount].isArray = true;
                         varCount++;
                     }
                     break;
@@ -441,8 +449,9 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFI " + Token.valor);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "int";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "int";
+                        varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -456,8 +465,9 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAI " + Token.valor + ", " + number);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "intArray";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "intArray";
+                        varTable[varCount].isArray = true;
                         varCount++;
                     }
                     break;
@@ -466,8 +476,9 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFF " + Token.valor);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "float";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "float";
+                        varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -481,8 +492,9 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAF " + Token.valor + ", " + number);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "floatArray";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "floatArray";
+                        varTable[varCount].isArray = true;
                         varCount++;
                     }
                     break;
@@ -491,8 +503,9 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFD " + Token.valor);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "double";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "double";
+                        varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -506,8 +519,9 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAD " + Token.valor + ", " + number);
-                        varTable[varCount, 0] = Token.valor;
-                        varTable[varCount, 1] = "doubleArray";
+                        varTable[varCount].name = Token.valor;
+                        varTable[varCount].type = "doubleArray";
+                        varTable[varCount].isArray = true;
                         varCount++;
                     }
                     break;
@@ -530,6 +544,7 @@ namespace Compile
             {
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
+                assignDirection();
             }
             else if (Token.index == 0)
             {
@@ -842,19 +857,64 @@ namespace Compile
         public static String CheckVarTable()
         {
             bool found = false;
-            for (int i = 0; i < varCount || found; i++)
+            for (int i = 0; i < varCount; i++)
             {
-                if(Token.valor == varTable[i,0])
+                if(Token.valor == varTable[i].name)
                 {
-                    return varTable[i, 1];
+                    found = true;
+                    return varTable[i].type;
+                    
                 }
             }
             if(found== false)
             {
                 Console.WriteLine("Error. Variable no existe");
             }
-            return "";
+            return "null";
         }
+        public static void assignDirection()
+        {
+            bool found = false;
+            for (int i = 0; i < varCount || found; i++)
+            {
+                if (Token.valor == varTable[i].name)
+                {
+                    varTable[i].direction = "0000";
+
+                    if(varTable[i].type == "char")
+                    {
+                        varTable[i].direction = directionHelper.ToString("4X");
+                        directionHelper++;
+                    }
+                    if (varTable[i].type == "string")
+                    {
+                        varTable[i].direction = directionHelper.ToString("4X");
+                        directionHelper = directionHelper + 50;
+                    }
+                    if (varTable[i].type == "int")
+                    {
+                        varTable[i].direction = directionHelper.ToString("4X");
+                        directionHelper = directionHelper + 4;
+                    }
+                    if (varTable[i].type == "float")
+                    {
+                        varTable[i].direction = directionHelper.ToString("4X");
+                        directionHelper = directionHelper + 4;
+                    }
+                    if (varTable[i].type == "double")
+                    {
+                        varTable[i].direction = directionHelper.ToString("4X");
+                        directionHelper = directionHelper + 4;
+                    }
+
+                }
+            }
+            if (found == false)
+            {
+                Console.WriteLine("Error. Variable no existe");
+            }
+        }
+
         public static void Debug()
         {
             Console.WriteLine("///Debug///");
@@ -878,6 +938,23 @@ namespace Compile
             index = ind;
             valor = val;
         }
+    }
+    class Variables
+    {
+        public string name { get; set; }
+        public string type { get; set; }
+        public string direction { get; set; }
+        public bool isArray  { get; set; }
+        public bool initialized { get; set; }
+        public Variables()
+        {
+            name = "x";
+            type = "null";
+            isArray = false;
+            initialized = false;
+            direction = "";
+        }
+
     }
 }
 
