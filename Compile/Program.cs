@@ -20,7 +20,7 @@ namespace Compile
         public static int directionHelper = 0;
         static void Main(string[] args)
         {
-            string line = " { if(a==5){b=5}}";
+            string line = " { if(a==5){a=5}  if(a==6){a=6}}";
             evaluate(line);
             Programa();
 
@@ -358,6 +358,8 @@ namespace Compile
             Token = tokensArray[tokenCount];
             Bloque();
             Console.WriteLine("HALT");
+
+            Console.WriteLine(codigochilo);
         }
         public static void Bloque()
         {
@@ -396,6 +398,7 @@ namespace Compile
                     {
                         Console.WriteLine("DEFC " + Token.valor);
                         varTable[varCount].name = Token.valor;
+                        Console.WriteLine("Se guardo este: " + varTable[varCount].name);
                         varTable[varCount].type = "char";
                         varTable[varCount].isArray = false;
                         varCount++;
@@ -857,11 +860,14 @@ namespace Compile
         public static String CheckVarTable()
         {
             bool found = false;
+            //Console.WriteLine("varCount " + varCount);
             for (int i = 0; i < varCount; i++)
             {
+               // Console.WriteLine("Se compararon estos: " + Token.valor + "    y    "  + varTable[i].name);
                 if(Token.valor == varTable[i].name)
                 {
                     found = true;
+                    //Console.WriteLine("///Found");
                     return varTable[i].type;
                     
                 }
@@ -911,7 +917,7 @@ namespace Compile
             }
             if (found == false)
             {
-                Console.WriteLine("Error. Variable no existe");
+                //Console.WriteLine("Error. Variable no existe");
             }
         }
 
