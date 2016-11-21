@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace Compile
 {
@@ -19,14 +20,15 @@ namespace Compile
         public static int LCount = 1;
         public static string JumpHelper = "";
         public static int directionHelper = 0;
+        public static string lastDirection = "";
         static void Main(string[] args)
         {
-            string line = "{int x x = 2}";
+            string line = "{int a a=3}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
-            CreateFile();
-
+            //CreateFile();
+            //RunVM();
             Console.ReadLine();
         }
 
@@ -34,7 +36,13 @@ namespace Compile
         {
             File.WriteAllBytes("vmcode.Chop", StringToByteArray(codigochilo));
         }
-
+        private static void RunVM()
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = @"Funcionaplox.exe";
+            startInfo.Arguments = @"vmode.Chop";
+            Process.Start(startInfo);
+        }
         private static byte[] StringToByteArray(string hex)
         {
             return Enumerable.Range(0, hex.Length)
@@ -212,7 +220,8 @@ namespace Compile
                             i++;
                             tokensArray[count] = new Tokens(40, "");
                             tokensArray[count].valor = charArray[i] +"";
-                            i = i + 2;
+                            i = i + 1;
+                            count++;
                         }
                         else
                         {
@@ -221,7 +230,7 @@ namespace Compile
                         }
                     }
                     //tokensArray[count] = new Tokens(34, "");
-                    count++;
+                    
                 }
                 else if (charArray[i] == '.')
                 {
@@ -408,7 +417,7 @@ namespace Compile
         }
         public static void Programa()
         {
-            codigochilo += "2843294348554e4b554e00000000";
+            codigochilo += "2843294348554E4B554E00000000";
             codigoByteCount = 15;
             Token = tokensArray[tokenCount];
             Bloque();
@@ -448,18 +457,19 @@ namespace Compile
                 case 0: //char
                     //char
                     nextToken();
-                    varTable[varCount] = new Variables();
+                    
                     if (Token.index == 50)
                     {
+                        varTable[varCount] = new Variables();
                         Console.WriteLine("DEFC " + Token.valor);
                         varTable[varCount].name = Token.valor;
-                        Console.WriteLine("Se guardo este: " + varTable[varCount].name);
                         varTable[varCount].type = "char";
                         varTable[varCount].isArray = false;
                         varCount++;
                     }
                     else if (Token.index == 25)
                     {
+                        varTable[varCount] = new Variables();
                         nextToken();
                         if (Token.index != 37)
                             Console.WriteLine("Error. Number expected in [ ].");
@@ -479,6 +489,7 @@ namespace Compile
                     nextToken();
                     if (Token.index == 50)
                     {
+                        varTable[varCount] = new Variables();
                         Console.WriteLine("DEFS " + Token.valor + ", 50");
                         varTable[varCount].name = Token.valor;
                         varTable[varCount] .type= "string";
@@ -487,6 +498,7 @@ namespace Compile
                     }
                     else if (Token.index == 25)
                     {
+                        varTable[varCount] = new Variables();
                         nextToken();
                         if (Token.index != 37)
                             Console.WriteLine("Error. Number expected in [ ].");
@@ -503,6 +515,7 @@ namespace Compile
                     }
                     break;
                 case 2: //int
+                    varTable[varCount] = new Variables();
                     nextToken();
                     if (Token.index == 50)
                     {
@@ -530,6 +543,7 @@ namespace Compile
                     }
                     break;
                 case 3: //float
+                    varTable[varCount] = new Variables();
                     nextToken();
                     if (Token.index == 50)
                     {
@@ -541,6 +555,7 @@ namespace Compile
                     }
                     else if (Token.index == 25)
                     {
+                        varTable[varCount] = new Variables();
                         nextToken();
                         if (Token.index != 37)
                             Console.WriteLine("Error. Number expected in [ ].");
@@ -557,6 +572,7 @@ namespace Compile
                     }
                     break;
                 case 4: //double
+                    varTable[varCount] = new Variables();
                     nextToken();
                     if (Token.index == 50)
                     {
@@ -568,6 +584,7 @@ namespace Compile
                     }
                     else if (Token.index == 25)
                     {
+                        varTable[varCount] = new Variables();
                         nextToken();
                         if (Token.index != 37)
                             Console.WriteLine("Error. Number expected in [ ].");
@@ -602,16 +619,16 @@ namespace Compile
             {
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
-                assignDirection();
-                codigochilo += "";
+                assignDirection(nombre);
+                codigochilo += "0D" + lastDirection;
             }
-            else if (Token.index == 0)
+            else if (Token.index == 40)
             {
                 Console.WriteLine("PUSHC " + Token.valor);
-                Console.WriteLine("POPC" + nombre);
+                Console.WriteLine("POPC " + nombre);
                 nextToken();
             }
-            else if (Token.index == 1)
+            else if (Token.index == 39)
             {
                 Console.WriteLine("PUSHS " + Token.valor);
                 Console.WriteLine("POPS" + nombre);
@@ -816,11 +833,13 @@ namespace Compile
             if (Token.index == 37) //numero
             {
                 Console.WriteLine("PUSHKI " + Token.valor);
+                codigochilo += "17" + Token.valor.PadLeft(8,'0');
                 nextToken();
             }
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
+                
                 nextToken();
             }
             else if (Token.index == 11) // OP  (
@@ -913,7 +932,7 @@ namespace Compile
             tokenCount++;
             Token = tokensArray[tokenCount];
         }
-        public static String CheckVarTable()
+        public static string CheckVarTable()
         {
             bool found = false;
             //Console.WriteLine("varCount " + varCount);
@@ -934,49 +953,62 @@ namespace Compile
             }
             return "null";
         }
-        public static void assignDirection()
+        public static void assignDirection(string name)
         {
             bool found = false;
-            for (int i = 0; i < varCount || found; i++)
+            for (int i = 0; i < varCount && found==false; i++)
             {
-                if (Token.valor == varTable[i].name)
+                if (name == varTable[i].name)
                 {
                     varTable[i].direction = "0000";
 
                     if(varTable[i].type == "char")
                     {
-                        varTable[i].direction = directionHelper.ToString("4X");
+                        varTable[i].direction = directionHelper.ToString("X4");
+                        Console.WriteLine("direccion:" + varTable[i].direction);
                         directionHelper++;
                     }
                     if (varTable[i].type == "string")
                     {
-                        varTable[i].direction = directionHelper.ToString("4X");
+                        varTable[i].direction = directionHelper.ToString("X4");
                         directionHelper = directionHelper + 50;
                     }
                     if (varTable[i].type == "int")
                     {
-                        varTable[i].direction = directionHelper.ToString("4X");
+                        varTable[i].direction = directionHelper.ToString("X4");
                         directionHelper = directionHelper + 4;
                     }
                     if (varTable[i].type == "float")
                     {
-                        varTable[i].direction = directionHelper.ToString("4X");
+                        varTable[i].direction = directionHelper.ToString("X4");
                         directionHelper = directionHelper + 4;
                     }
                     if (varTable[i].type == "double")
                     {
-                        varTable[i].direction = directionHelper.ToString("4X");
+                        varTable[i].direction = directionHelper.ToString("X4");
                         directionHelper = directionHelper + 4;
                     }
-
+                    lastDirection = varTable[i].direction;
+                    //Console.WriteLine("pup" + varTable[i].direction);
                 }
             }
+
             if (found == false)
             {
                 //Console.WriteLine("Error. Variable no existe");
             }
         }
-
+        public static string GetDirection(string n)
+        {
+            for(int i=0; i< varTable.Length;i++)
+            {
+                if(n == varTable[i].name)
+                {
+                    return varTable[i].direction;
+                }
+            }
+            return "";
+        }
         public static void Debug()
         {
             Console.WriteLine("///Debug///");
@@ -1010,7 +1042,7 @@ namespace Compile
         public bool initialized { get; set; }
         public Variables()
         {
-            name = "x";
+            name = "noname";
             type = "null";
             isArray = false;
             initialized = false;
