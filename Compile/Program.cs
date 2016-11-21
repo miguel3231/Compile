@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Compile
 {
@@ -20,14 +21,28 @@ namespace Compile
         public static int directionHelper = 0;
         static void Main(string[] args)
         {
-            string line = "char caca 'p' int a a = 5";
+            string line = "{int x x = 2}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
-            //Programa();
-
+            Programa();
+            CreateFile();
 
             Console.ReadLine();
         }
+
+        private static void CreateFile()
+        {
+            File.WriteAllBytes("vmcode.Chop", StringToByteArray(codigochilo));
+        }
+
+        private static byte[] StringToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                    .Where(x => x % 2 == 0)
+                    .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                    .ToArray();
+        }
+
         public static void evaluate(string expression)
         {
             //variables
