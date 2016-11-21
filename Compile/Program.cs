@@ -23,7 +23,7 @@ namespace Compile
         public static string lastDirection = "";
         static void Main(string[] args)
         {
-            string line = "{int a a=3}";
+            string line = "{int a int b  a = b}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -624,14 +624,16 @@ namespace Compile
             }
             else if (Token.index == 40)
             {
-                Console.WriteLine("PUSHC " + Token.valor);
+                Console.WriteLine("PUSHKC " + Token.valor);
+                codigochilo += "16" + Token.valor.PadLeft(2, '0'); //not sure
                 Console.WriteLine("POPC " + nombre);
                 nextToken();
             }
             else if (Token.index == 39)
             {
-                Console.WriteLine("PUSHS " + Token.valor);
-                Console.WriteLine("POPS" + nombre);
+                Console.WriteLine("PUSHKS " + Token.valor);
+                codigochilo += "1A50" + Token.valor.PadLeft(4, '0'); //not sure
+                Console.WriteLine("POPS" + nombre); 
                 nextToken();
             }
 
@@ -738,11 +740,13 @@ namespace Compile
                 Token.index == 21 || //==
                 Token.index == 22) // !=
             {
+                
                 if(Token.index == 17)
                 {
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPLT " ); 
                     JumpHelper = "JMPGE"; //opuesto a la comparacion realizada
                 }
@@ -751,6 +755,7 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPLE ");
                     JumpHelper = "JMPGT";
                 }
@@ -759,6 +764,7 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPGT ");
                     JumpHelper = "JMPLE";
 
@@ -768,6 +774,7 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPGE ");
                     JumpHelper = "JMMPLT";
                 }
@@ -776,6 +783,7 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPEQ ");
                     JumpHelper = "JMPNE";
                 }
@@ -784,6 +792,7 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
+                    codigochilo += "40";
                     //Console.WriteLine("JMPNE "); 
                     JumpHelper = "JMPEQ";
                 }
@@ -800,12 +809,14 @@ namespace Compile
                     nextToken();
                     Factor();
                     Console.WriteLine("ADD");
+                    codigochilo += "3B";
                 }
                 else if (Token.index == 14)
                 {
                     nextToken();
                     Factor();
                     Console.WriteLine("SUB");
+                    codigochilo += "3C";
                 }
             }
         }
@@ -819,12 +830,14 @@ namespace Compile
                     nextToken();
                     Terminal();
                     Console.WriteLine("MULT");
+                    codigochilo += "3D";
                 }
                 else if (Token.index == 16)
                 {
                     nextToken();
                     Terminal();
                     Console.WriteLine("DIV");
+                    codigochilo += "3E";
                 }
             }
         }
@@ -839,7 +852,7 @@ namespace Compile
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
-                
+                codigochilo += "0D" + GetDirection(Token.valor);
                 nextToken();
             }
             else if (Token.index == 11) // OP  (
@@ -1007,6 +1020,7 @@ namespace Compile
                     return varTable[i].direction;
                 }
             }
+            Console.WriteLine("Error. Variable sin direccion.");
             return "";
         }
         public static void Debug()
@@ -1046,7 +1060,7 @@ namespace Compile
             type = "null";
             isArray = false;
             initialized = false;
-            direction = "";
+            direction = "-1";
         }
 
     }
