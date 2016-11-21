@@ -4,3 +4,9 @@ c:\users\miguel\documents\visual studio 2015\Projects\Compile\Compile\bin\Debug\
 c:\users\miguel\documents\visual studio 2015\Projects\Compile\Compile\bin\Debug\Compile.pdb
 c:\users\miguel\documents\visual studio 2015\Projects\Compile\Compile\obj\Debug\Compile.exe
 c:\users\miguel\documents\visual studio 2015\Projects\Compile\Compile\obj\Debug\Compile.pdb
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\bin\Debug\Compile.exe.config
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\obj\Debug\Compile.exe
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\obj\Debug\Compile.pdb
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\bin\Debug\Compile.exe
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\bin\Debug\Compile.pdb
+C:\Users\Recepcion\Documents\MBM\Compile\Compile\obj\Debug\Compile.csprojResolveAssemblyReference.cache

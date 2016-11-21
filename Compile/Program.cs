@@ -20,9 +20,10 @@ namespace Compile
         public static int directionHelper = 0;
         static void Main(string[] args)
         {
-            string line = " { if(a==5){a=5}  if(a==6){a=6}}";
+            string line = "char caca 'p' int a a = 5";
+            Console.WriteLine("Evaluate: " + line);
             evaluate(line);
-            Programa();
+            //Programa();
 
 
             Console.ReadLine();
@@ -163,9 +164,48 @@ namespace Compile
                     tokensArray[count] = new Tokens(30, "");
                     count++;
                 }
-                else if (charArray[i] == '"')
+                else if (charArray[i] == '"') //guardar un string
                 {
-                    tokensArray[count] = new Tokens(34, "");
+                    i++;
+                    bool found = false;
+                    tokensArray[count] = new Tokens(39, "");
+                    while (found ==false && i < charArray.Length)
+                    {                       
+                        if (charArray[i] == '"')
+                        {
+                            found = true;
+                            tokensArray[count].valor = word;
+                            
+                            count++;
+                            //i++;
+                        }
+                        else
+                        {
+                            word += charArray[i]+"";
+                            i++;
+                        }
+                    }
+                    word = "";
+                    
+                }
+                else if (charArray[i] == '\'') //guardar un char
+                {
+                    if(i+2<charArray.Length)
+                    {
+                        if(charArray[i+2]== '\'')
+                        {
+                            i++;
+                            tokensArray[count] = new Tokens(40, "");
+                            tokensArray[count].valor = charArray[i] +"";
+                            i = i + 2;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error. Char not properly written.");
+                            i++;
+                        }
+                    }
+                    //tokensArray[count] = new Tokens(34, "");
                     count++;
                 }
                 else if (charArray[i] == '.')
@@ -548,6 +588,7 @@ namespace Compile
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
                 assignDirection();
+                codigochilo += "";
             }
             else if (Token.index == 0)
             {
@@ -1004,5 +1045,7 @@ namespace Compile
 //36 .
 //37 number
 //38 decimal
+//39 un string
+//40 un char
 //50 "variable"
 //51 unrecognized
