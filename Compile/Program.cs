@@ -21,9 +21,10 @@ namespace Compile
         public static string JumpHelper = "";
         public static int directionHelper = 0;
         public static string lastDirection = "";
+        public static int StringLength = 0;
         static void Main(string[] args)
         {
-            string line = "{int a int b b=3 a = b print(a)}";
+            string line = "{string a a=\"caca\" print(a)}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -636,8 +637,11 @@ namespace Compile
             else if (Token.index == 39)
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
-                codigochilo += "1A50" + Token.valor.PadLeft(4, '0'); //not sure
+                codigochilo += "1A" +(Token.valor.Length+"").PadLeft(2,'0') + "" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0'); //not sure
+                StringLength = Token.valor.Length;
                 Console.WriteLine("POPS" + nombre);
+                assignDirection(nombre);
+                codigochilo += "1F" + lastDirection;
                 nextToken();
             }
 
@@ -1008,7 +1012,7 @@ namespace Compile
                     if (varTable[i].type == "string")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
-                        directionHelper = directionHelper + 50;
+                        directionHelper = directionHelper + StringLength;
                     }
                     if (varTable[i].type == "int")
                     {
@@ -1046,6 +1050,22 @@ namespace Compile
             }
             Console.WriteLine("Error. Variable sin direccion.");
             return "";
+        }
+        public static string ConvertStringtoHexa(string input)
+        {
+            string result = "";
+            char[] values = input.ToCharArray();
+            foreach (char letter in values)
+            {
+                // Get the integral value of the character.
+                int value = Convert.ToInt32(letter);
+                // Convert the decimal value to a hexadecimal value in string form.
+                string hexOutput = String.Format("{0:X}", value);
+                result += ""+hexOutput;
+                Console.WriteLine("Hexadecimal value of {0} is {1}", letter, hexOutput);
+            }
+            Console.WriteLine("Result: " + result);
+            return result;
         }
         public static void Debug()
         {
