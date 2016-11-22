@@ -23,7 +23,7 @@ namespace Compile
         public static string lastDirection = "";
         static void Main(string[] args)
         {
-            string line = "{int a int b  a = b}";
+            string line = "{int a int b b=3 a = b print(a)}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -192,34 +192,34 @@ namespace Compile
                     i++;
                     bool found = false;
                     tokensArray[count] = new Tokens(39, "");
-                    while (found ==false && i < charArray.Length)
-                    {                       
+                    while (found == false && i < charArray.Length)
+                    {
                         if (charArray[i] == '"')
                         {
                             found = true;
                             tokensArray[count].valor = word;
-                            
+
                             count++;
                             //i++;
                         }
                         else
                         {
-                            word += charArray[i]+"";
+                            word += charArray[i] + "";
                             i++;
                         }
                     }
                     word = "";
-                    
+
                 }
                 else if (charArray[i] == '\'') //guardar un char
                 {
-                    if(i+2<charArray.Length)
+                    if (i + 2 < charArray.Length)
                     {
-                        if(charArray[i+2]== '\'')
+                        if (charArray[i + 2] == '\'')
                         {
                             i++;
                             tokensArray[count] = new Tokens(40, "");
-                            tokensArray[count].valor = charArray[i] +"";
+                            tokensArray[count].valor = charArray[i] + "";
                             i = i + 1;
                             count++;
                         }
@@ -230,7 +230,7 @@ namespace Compile
                         }
                     }
                     //tokensArray[count] = new Tokens(34, "");
-                    
+
                 }
                 else if (charArray[i] == '.')
                 {
@@ -395,6 +395,8 @@ namespace Compile
                 return 9;
             else if (word == "read")
                 return 10;
+            else if (word == "printl")
+                return 41;
             else
                 return 50;
         }
@@ -418,6 +420,7 @@ namespace Compile
         public static void Programa()
         {
             codigochilo += "2843294348554E4B554E00000000";
+            codigochilo += "\n"; //testing purposes, must die eventually
             codigoByteCount = 15;
             Token = tokensArray[tokenCount];
             Bloque();
@@ -449,7 +452,7 @@ namespace Compile
                 DoInstruction();
             }
         }
-        
+
         public static void DoDeclaration()
         {
             switch (Token.index)
@@ -457,7 +460,7 @@ namespace Compile
                 case 0: //char
                     //char
                     nextToken();
-                    
+
                     if (Token.index == 50)
                     {
                         varTable[varCount] = new Variables();
@@ -492,7 +495,7 @@ namespace Compile
                         varTable[varCount] = new Variables();
                         Console.WriteLine("DEFS " + Token.valor + ", 50");
                         varTable[varCount].name = Token.valor;
-                        varTable[varCount] .type= "string";
+                        varTable[varCount].type = "string";
                         varTable[varCount].isArray = false;
                         varCount++;
                     }
@@ -620,7 +623,8 @@ namespace Compile
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
                 assignDirection(nombre);
-                codigochilo += "0D" + lastDirection;
+                codigochilo += "1C" + lastDirection;
+                codigochilo += "\n"; //testing purposes, must die eventually
             }
             else if (Token.index == 40)
             {
@@ -633,7 +637,7 @@ namespace Compile
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
                 codigochilo += "1A50" + Token.valor.PadLeft(4, '0'); //not sure
-                Console.WriteLine("POPS" + nombre); 
+                Console.WriteLine("POPS" + nombre);
                 nextToken();
             }
 
@@ -646,9 +650,9 @@ namespace Compile
                 Match("OP");
                 BoolExpretion();
                 Match("CP");
-                Console.WriteLine(JumpHelper + " L" +LCount);
+                Console.WriteLine(JumpHelper + " L" + LCount);
                 Bloque();
-                Console.WriteLine("L" + LCount+":");
+                Console.WriteLine("L" + LCount + ":");
                 LCount++;
 
             }
@@ -660,6 +664,13 @@ namespace Compile
                 Match("CP");
                 //Console.WriteLine("prtcr");
             }
+            else if(Token.index == 41)
+            {
+                Console.WriteLine("PRTCR");
+                codigochilo += "01";
+                codigochilo += "\n"; //testing purposes, must die eventually
+                nextToken();
+            }
         }
         private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
         {
@@ -667,6 +678,8 @@ namespace Compile
             {
                 case "char": // char
                     Console.WriteLine("PRTC " + Token.valor);
+                    codigochilo += "02" + GetDirection(Token.valor);
+                    codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "charArray":
@@ -675,6 +688,8 @@ namespace Compile
                     break;
                 case "string": //String
                     Console.WriteLine("PRTS " + Token.valor);
+                    codigochilo += "06" + GetDirection(Token.valor);
+                    codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "stringArray":
@@ -683,6 +698,8 @@ namespace Compile
                     break;
                 case "int": //int
                     Console.WriteLine("PRTI " + Token.valor);
+                    codigochilo += "03" + GetDirection(Token.valor);
+                    codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "intArray":
@@ -691,6 +708,7 @@ namespace Compile
                     break;
                 case "float": //float
                     Console.WriteLine("PRTF " + Token.valor);
+                    codigochilo += "04" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "floatArray":
@@ -699,6 +717,7 @@ namespace Compile
                     break;
                 case "double": //double
                     Console.WriteLine("PRTD " + Token.valor);
+                    codigochilo += "05" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "doubleArray":
@@ -714,13 +733,13 @@ namespace Compile
         public static void BoolExpretion()
         {
             Comparison();
-            while(Token.index == 31 || Token.index == 32)
+            while (Token.index == 31 || Token.index == 32)
             {
-                if(Token.index == 31)
+                if (Token.index == 31)
                 {
                     //pending, no idea what happens here
                 }
-                else if(Token.index == 32)
+                else if (Token.index == 32)
                 {
                     //pending, no idea what happens here
                 }
@@ -733,20 +752,21 @@ namespace Compile
         public static void Comparison()
         {
             Expretion();
-            while(Token.index == 17 || //<
+            while (Token.index == 17 || //<
                 Token.index == 18 || //<=
                 Token.index == 19 || //>
                 Token.index == 20 || //>=
                 Token.index == 21 || //==
                 Token.index == 22) // !=
             {
-                
-                if(Token.index == 17)
+
+                if (Token.index == 17)
                 {
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
                     codigochilo += "40";
+                    codigochilo += "\n"; //testing purposes, must die eventually
                     //Console.WriteLine("JMPLT " ); 
                     JumpHelper = "JMPGE"; //opuesto a la comparacion realizada
                 }
@@ -810,6 +830,7 @@ namespace Compile
                     Factor();
                     Console.WriteLine("ADD");
                     codigochilo += "3B";
+                    codigochilo += "\n"; //testing purposes, must die eventually
                 }
                 else if (Token.index == 14)
                 {
@@ -846,13 +867,15 @@ namespace Compile
             if (Token.index == 37) //numero
             {
                 Console.WriteLine("PUSHKI " + Token.valor);
-                codigochilo += "17" + Token.valor.PadLeft(8,'0');
+                codigochilo += "17" + Token.valor.PadLeft(8, '0');
+                codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
                 codigochilo += "0D" + GetDirection(Token.valor);
+                codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
             else if (Token.index == 11) // OP  (
@@ -920,6 +943,7 @@ namespace Compile
                 Token.index == 7 || //for
                 Token.index == 8 || //while
                 Token.index == 9 || // print
+                Token.index == 41 || //printl
                 Token.index == 50;
         }
         public static bool isDeclaration()
@@ -1108,5 +1132,6 @@ namespace Compile
 //38 decimal
 //39 un string
 //40 un char
+//41 printl
 //50 "variable"
 //51 unrecognized

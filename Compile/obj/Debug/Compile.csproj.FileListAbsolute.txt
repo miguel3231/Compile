@@ -16,3 +16,9 @@ C:\Users\Alexis\Documents\GitHub\Compile\Compile\obj\Debug\Compile.pdb
 C:\Users\Alexis\Documents\GitHub\Compile\Compile\bin\Debug\Compile.exe
 C:\Users\Alexis\Documents\GitHub\Compile\Compile\bin\Debug\Compile.pdb
 C:\Users\Alexis\Documents\GitHub\Compile\Compile\obj\Debug\Compile.csprojResolveAssemblyReference.cache
+C:\Users\Mike\Documents\GitHub\Compile\Compile\bin\Debug\Compile.exe.config
+C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.exe
+C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.pdb
+C:\Users\Mike\Documents\GitHub\Compile\Compile\bin\Debug\Compile.exe
+C:\Users\Mike\Documents\GitHub\Compile\Compile\bin\Debug\Compile.pdb
+C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.csprojResolveAssemblyReference.cache
