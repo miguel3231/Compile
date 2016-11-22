@@ -24,7 +24,7 @@ namespace Compile
         public static int StringLength = 0;
         static void Main(string[] args)
         {
-            string line = "{string a a=\"caca\" print(a)}";
+            string line = "{char a a = 'b' print(a)}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -630,14 +630,16 @@ namespace Compile
             else if (Token.index == 40)
             {
                 Console.WriteLine("PUSHKC " + Token.valor);
-                codigochilo += "16" + Token.valor.PadLeft(2, '0'); //not sure
+                codigochilo += "16" + ConvertStringtoHexa(Token.valor);
                 Console.WriteLine("POPC " + nombre);
+                assignDirection(nombre);
+                codigochilo += "1B" + lastDirection;
                 nextToken();
             }
             else if (Token.index == 39)
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
-                codigochilo += "1A" +(Token.valor.Length+"").PadLeft(2,'0') + "" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0'); //not sure
+                codigochilo += "1A" +(Token.valor.Length+"").PadLeft(2,'0') + "" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0'); 
                 StringLength = Token.valor.Length;
                 Console.WriteLine("POPS" + nombre);
                 assignDirection(nombre);
