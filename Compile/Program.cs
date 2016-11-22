@@ -27,8 +27,8 @@ namespace Compile
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
-            //CreateFile();
-            //RunVM();
+            CreateFile();
+            RunVM();
             Console.ReadLine();
         }
 
@@ -40,7 +40,7 @@ namespace Compile
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = @"Funcionaplox.exe";
-            startInfo.Arguments = @"vmode.Chop";
+            startInfo.Arguments = @"vmcode.Chop";
             Process.Start(startInfo);
         }
         private static byte[] StringToByteArray(string hex)
@@ -420,7 +420,7 @@ namespace Compile
         public static void Programa()
         {
             codigochilo += "2843294348554E4B554E00000000";
-            codigochilo += "\n"; //testing purposes, must die eventually
+            //codigochilo += "\n"; //testing purposes, must die eventually
             codigoByteCount = 15;
             Token = tokensArray[tokenCount];
             Bloque();
@@ -624,7 +624,7 @@ namespace Compile
                 Console.WriteLine("POPI " + nombre);
                 assignDirection(nombre);
                 codigochilo += "1C" + lastDirection;
-                codigochilo += "\n"; //testing purposes, must die eventually
+                //codigochilo += "\n"; //testing purposes, must die eventually
             }
             else if (Token.index == 40)
             {
@@ -668,7 +668,7 @@ namespace Compile
             {
                 Console.WriteLine("PRTCR");
                 codigochilo += "01";
-                codigochilo += "\n"; //testing purposes, must die eventually
+                //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
         }
@@ -679,7 +679,7 @@ namespace Compile
                 case "char": // char
                     Console.WriteLine("PRTC " + Token.valor);
                     codigochilo += "02" + GetDirection(Token.valor);
-                    codigochilo += "\n"; //testing purposes, must die eventually
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "charArray":
@@ -689,7 +689,7 @@ namespace Compile
                 case "string": //String
                     Console.WriteLine("PRTS " + Token.valor);
                     codigochilo += "06" + GetDirection(Token.valor);
-                    codigochilo += "\n"; //testing purposes, must die eventually
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "stringArray":
@@ -699,7 +699,7 @@ namespace Compile
                 case "int": //int
                     Console.WriteLine("PRTI " + Token.valor);
                     codigochilo += "03" + GetDirection(Token.valor);
-                    codigochilo += "\n"; //testing purposes, must die eventually
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "intArray":
@@ -766,7 +766,7 @@ namespace Compile
                     Expretion();
                     Console.WriteLine("CMP");
                     codigochilo += "40";
-                    codigochilo += "\n"; //testing purposes, must die eventually
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                     //Console.WriteLine("JMPLT " ); 
                     JumpHelper = "JMPGE"; //opuesto a la comparacion realizada
                 }
@@ -830,7 +830,7 @@ namespace Compile
                     Factor();
                     Console.WriteLine("ADD");
                     codigochilo += "3B";
-                    codigochilo += "\n"; //testing purposes, must die eventually
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                 }
                 else if (Token.index == 14)
                 {
@@ -868,14 +868,14 @@ namespace Compile
             {
                 Console.WriteLine("PUSHKI " + Token.valor);
                 codigochilo += "17" + Token.valor.PadLeft(8, '0');
-                codigochilo += "\n"; //testing purposes, must die eventually
+                //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
                 codigochilo += "0D" + GetDirection(Token.valor);
-                codigochilo += "\n"; //testing purposes, must die eventually
+                //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
             else if (Token.index == 11) // OP  (
