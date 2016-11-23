@@ -22,11 +22,9 @@ namespace Compile
         public static int directionHelper = 0;
         public static string lastDirection = "";
         public static int StringLength = 0;
-        public static int sc = 0;
-        public static string directionSize = "";
         static void Main(string[] args)
         {
-            string line = "{int a int b a=5 b=6 a=a+b print(a)}";
+            string line = "{int a int b a=5 b=6}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -421,19 +419,12 @@ namespace Compile
         }
         public static void Programa()
         {
-
+            codigochilo += "2843294348554E4B554E00000000";
             //codigochilo += "\n"; //testing purposes, must die eventually
             codigoByteCount = 15;
             Token = tokensArray[tokenCount];
             Bloque();
             Console.WriteLine("HALT");
-            sc++;
-            codigochilo += "00";
-
-            Console.WriteLine("Last Direction: " + directionHelper + "hex: " + directionHelper.ToString("X4"));
-            Console.WriteLine("SC: " + sc + "hex: "+ sc.ToString("X4"));
-            codigochilo = "2843294348554E4B554E"+ directionSize + ""+ sc.ToString("X4") + "" + codigochilo;
-            
 
             Console.WriteLine(codigochilo);
         }
@@ -474,7 +465,6 @@ namespace Compile
                     {
                         varTable[varCount] = new Variables();
                         Console.WriteLine("DEFC " + Token.valor);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "char";
                         varTable[varCount].isArray = false;
@@ -492,7 +482,6 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAC " + Token.valor + ", " + number);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "charArray";
                         varTable[varCount].isArray = true;
@@ -505,7 +494,6 @@ namespace Compile
                     {
                         varTable[varCount] = new Variables();
                         Console.WriteLine("DEFS " + Token.valor + ", 50");
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "string";
                         varTable[varCount].isArray = false;
@@ -523,7 +511,6 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAS " + Token.valor + ", 50, " + number);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "stringArray";
                         varTable[varCount].isArray = true;
@@ -536,7 +523,6 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFI " + Token.valor);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "int";
                         varTable[varCount].isArray = false;
@@ -553,7 +539,6 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAI " + Token.valor + ", " + number);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "intArray";
                         varTable[varCount].isArray = true;
@@ -566,7 +551,6 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFF " + Token.valor);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "float";
                         varTable[varCount].isArray = false;
@@ -584,7 +568,6 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAF " + Token.valor + ", " + number);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "floatArray";
                         varTable[varCount].isArray = true;
@@ -597,7 +580,6 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         Console.WriteLine("DEFD " + Token.valor);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "double";
                         varTable[varCount].isArray = false;
@@ -615,7 +597,6 @@ namespace Compile
                         if (Token.index != 50)
                             Console.WriteLine("Error. Variable expected.");
                         Console.WriteLine("DEFAD " + Token.valor + ", " + number);
-                        sc++;
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "doubleArray";
                         varTable[varCount].isArray = true;
@@ -641,47 +622,30 @@ namespace Compile
             {
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
-                sc++;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre);
-                }
+                assignDirection(nombre);
                 codigochilo += "1C" + lastDirection;
                 //codigochilo += "\n"; //testing purposes, must die eventually
             }
             else if (Token.index == 40)
             {
                 Console.WriteLine("PUSHKC " + Token.valor);
-                sc++;
                 codigochilo += "16" + ConvertStringtoHexa(Token.valor);
                 Console.WriteLine("POPC " + nombre);
-                sc++;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre);
-                }
+                assignDirection(nombre);
                 codigochilo += "1B" + lastDirection;
                 nextToken();
             }
             else if (Token.index == 39)
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
-                sc++;
-                codigochilo += "1A50" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0');
-                sc++;
+                codigochilo += "1A50" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0'); 
                 StringLength = Token.valor.Length;
                 Console.WriteLine("POPS" + nombre);
-                sc++;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre);
-                }
+                assignDirection(nombre);
                 codigochilo += "1F" + lastDirection;
                 nextToken();
             }
+
         }
         private static void DoInstruction()
         {
@@ -692,7 +656,6 @@ namespace Compile
                 BoolExpretion();
                 Match("CP");
                 Console.WriteLine(JumpHelper + " L" + LCount);
-                sc++;
                 Bloque();
                 Console.WriteLine("L" + LCount + ":");
                 LCount++;
@@ -709,7 +672,6 @@ namespace Compile
             else if(Token.index == 41)
             {
                 Console.WriteLine("PRTCR");
-                sc++;
                 codigochilo += "01";
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
@@ -721,60 +683,50 @@ namespace Compile
             {
                 case "char": // char
                     Console.WriteLine("PRTC " + Token.valor);
-                    sc++;
                     codigochilo += "02" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "charArray":
                     Console.WriteLine("PRTAC " + Token.valor);
-                    sc++;
                     nextToken();
                     break;
                 case "string": //String
                     Console.WriteLine("PRTS " + Token.valor);
-                    sc++;
                     codigochilo += "06" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "stringArray":
                     Console.WriteLine("PRTAS " + Token.valor);
-                    sc++;
                     nextToken();
                     break;
                 case "int": //int
                     Console.WriteLine("PRTI " + Token.valor);
-                    sc++;
                     codigochilo += "03" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "intArray":
                     Console.WriteLine("PRTAI " + Token.valor);
-                    sc++;
                     nextToken();
                     break;
                 case "float": //float
                     Console.WriteLine("PRTF " + Token.valor);
-                    sc++;
                     codigochilo += "04" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "floatArray":
                     Console.WriteLine("PRTAF " + Token.valor);
-                    sc++;
                     nextToken();
                     break;
                 case "double": //double
                     Console.WriteLine("PRTD " + Token.valor);
-                    sc++;
                     codigochilo += "05" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "doubleArray":
                     Console.WriteLine("PRTAD " + Token.valor);
-                    sc++;
                     nextToken();
                     break;
                 default:
@@ -818,7 +770,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     //Console.WriteLine("JMPLT " ); 
@@ -829,7 +780,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //Console.WriteLine("JMPLE ");
                     JumpHelper = "JMPGT";
@@ -839,7 +789,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //Console.WriteLine("JMPGT ");
                     JumpHelper = "JMPLE";
@@ -850,7 +799,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //Console.WriteLine("JMPGE ");
                     JumpHelper = "JMMPLT";
@@ -860,7 +808,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //Console.WriteLine("JMPEQ ");
                     JumpHelper = "JMPNE";
@@ -870,7 +817,6 @@ namespace Compile
                     nextToken();
                     Expretion();
                     Console.WriteLine("CMP");
-                    sc++;
                     codigochilo += "40";
                     //Console.WriteLine("JMPNE "); 
                     JumpHelper = "JMPEQ";
@@ -888,7 +834,6 @@ namespace Compile
                     nextToken();
                     Factor();
                     Console.WriteLine("ADD");
-                    sc++;
                     codigochilo += "3B";
                     //codigochilo += "\n"; //testing purposes, must die eventually
                 }
@@ -897,7 +842,6 @@ namespace Compile
                     nextToken();
                     Factor();
                     Console.WriteLine("SUB");
-                    sc++;
                     codigochilo += "3C";
                 }
             }
@@ -912,7 +856,6 @@ namespace Compile
                     nextToken();
                     Terminal();
                     Console.WriteLine("MULT");
-                    sc++;
                     codigochilo += "3D";
                 }
                 else if (Token.index == 16)
@@ -920,7 +863,6 @@ namespace Compile
                     nextToken();
                     Terminal();
                     Console.WriteLine("DIV");
-                    sc++;
                     codigochilo += "3E";
                 }
             }
@@ -930,7 +872,6 @@ namespace Compile
             if (Token.index == 37) //numero
             {
                 Console.WriteLine("PUSHKI " + Token.valor);
-                sc++;
                 codigochilo += "17" + Token.valor.PadLeft(8, '0');
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
@@ -938,7 +879,6 @@ namespace Compile
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
-                sc++;
                 codigochilo += "0D" + GetDirection(Token.valor);
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
@@ -1066,32 +1006,26 @@ namespace Compile
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
                         Console.WriteLine("direccion:" + varTable[i].direction);
-                        directionSize = varTable[i].direction;
                         directionHelper++;
                     }
                     if (varTable[i].type == "string")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
-                        directionSize = varTable[i].direction;
                         directionHelper = directionHelper + StringLength;
-
                     }
                     if (varTable[i].type == "int")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
-                        directionSize = varTable[i].direction;
                         directionHelper = directionHelper + 4;
                     }
                     if (varTable[i].type == "float")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
-                        directionSize = varTable[i].direction;
                         directionHelper = directionHelper + 4;
                     }
                     if (varTable[i].type == "double")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
-                        directionSize = varTable[i].direction;
                         directionHelper = directionHelper + 4;
                     }
                     lastDirection = varTable[i].direction;
