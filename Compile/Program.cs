@@ -27,7 +27,7 @@ namespace Compile
         public static int[] JumpList = new int[50];
         static void Main(string[] args)
         {
-            string line = "{int a a=11 print(a)}";
+            string line = "{int a a=1 while(a<12){a=a+1 print(a) printl}}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -433,12 +433,12 @@ namespace Compile
             codigochilo += "00";
 
             Console.WriteLine("Last Direction: " + directionHelper + "hex: " + directionHelper.ToString("X4"));
-            Console.WriteLine("SC: " + sc + "hex: "+ sc.ToString("X4"));
-            codigochilo = "2843294348554E4B554E"+ directionSize + ""+ sc.ToString("X4") + "" + codigochilo;
-            
-            for(int i=0;i<=LCount;i++)
+            Console.WriteLine("SC: " + sc + "hex: " + sc.ToString("X4"));
+            codigochilo = "2843294348554E4B554E" + directionSize + "" + sc.ToString("X4") + "" + codigochilo;
+
+            for (int i = 0; i <= LCount; i++)
             {
-                codigochilo = codigochilo.Replace("replace"+i+"replace",JumpList[i].ToString("X4"));
+                codigochilo = codigochilo.Replace("replace" + i + "replace", JumpList[i].ToString("X4"));
             }
 
 
@@ -667,7 +667,7 @@ namespace Compile
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
                 sc++; // pending
-                codigochilo += "1A50" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length*2, '0');
+                codigochilo += "1A50" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length * 2, '0');
                 sc++;
                 StringLength = Token.valor.Length;
                 Console.WriteLine("POPS" + nombre);
@@ -691,7 +691,7 @@ namespace Compile
                 Match("CP");
                 Console.WriteLine(JumpHelper + " L" + LCount); //JUMPNE L0
                 JumpWriteCode(JumpHelper);
-                codigochilo += "replace" + LCount +"replace";
+                codigochilo += "replace" + LCount + "replace";
                 sc = sc + 3;
                 Bloque();
                 Console.WriteLine("L" + LCount + ":");
@@ -699,7 +699,7 @@ namespace Compile
                 LCount++;
 
             }
-            else if(Token.index == 8) //while
+            else if (Token.index == 8) //while
             {
                 nextToken();
                 Console.WriteLine("L" + LCount + ":");
@@ -707,16 +707,16 @@ namespace Compile
                 Match("OP");
                 BoolExpretion();
                 Match("CP");
-                Console.WriteLine(JumpHelper + " L" + (LCount+1));
+                Console.WriteLine(JumpHelper + " L" + (LCount + 1));
                 JumpWriteCode(JumpHelper);
-                codigochilo += "replace" + (LCount+1)+ "replace";
+                codigochilo += "replace" + (LCount + 1) + "replace";
                 sc = sc + 3;
                 Bloque();
-                Console.WriteLine("JMP L" + LCount );
-                codigochilo +="30" + "replace" + LCount + "replace";
-                sc =sc+3;
-                Console.WriteLine("L" + (LCount +1) + ":");
-                JumpList[LCount+1] = sc;
+                Console.WriteLine("JMP L" + LCount);
+                codigochilo += "30" + "replace" + LCount + "replace";
+                sc = sc + 3;
+                Console.WriteLine("L" + (LCount + 1) + ":");
+                JumpList[LCount + 1] = sc;
                 LCount++;
 
             }
@@ -728,7 +728,7 @@ namespace Compile
                 Match("CP");
                 //Console.WriteLine("prtcr");
             }
-            else if(Token.index == 41)
+            else if (Token.index == 41) //printl
             {
                 Console.WriteLine("PRTCR");
                 sc++;
@@ -743,60 +743,60 @@ namespace Compile
             {
                 case "char": // char
                     Console.WriteLine("PRTC " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     codigochilo += "02" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "charArray":
                     Console.WriteLine("PRTAC " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     nextToken();
                     break;
                 case "string": //String
                     Console.WriteLine("PRTS " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     codigochilo += "06" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "stringArray":
                     Console.WriteLine("PRTAS " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     nextToken();
                     break;
                 case "int": //int
                     Console.WriteLine("PRTI " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     codigochilo += "03" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                     break;
                 case "intArray":
                     Console.WriteLine("PRTAI " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     nextToken();
                     break;
                 case "float": //float
                     Console.WriteLine("PRTF " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     codigochilo += "04" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "floatArray":
                     Console.WriteLine("PRTAF " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     nextToken();
                     break;
                 case "double": //double
                     Console.WriteLine("PRTD " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     codigochilo += "05" + GetDirection(Token.valor);
                     nextToken();
                     break;
                 case "doubleArray":
                     Console.WriteLine("PRTAD " + Token.valor);
-                    sc=sc+3;
+                    sc = sc + 3;
                     nextToken();
                     break;
                 default:
@@ -952,15 +952,18 @@ namespace Compile
             if (Token.index == 37) //numero
             {
                 Console.WriteLine("PUSHKI " + Token.valor);
-                sc=sc+5;
-                codigochilo += "17" + Token.valor.PadLeft(8, '0');
+                sc = sc + 5;
+                //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
+                //Console.WriteLine(" Este es el token valor:" + Token.valor);
+                //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
+                codigochilo += "17" + Int32.Parse(Token.valor).ToString("X4").PadLeft(8, '0');
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
             else if (Token.index == 50) // variable
             {
                 Console.WriteLine("PUSHI " + Token.valor);
-                sc=sc+3;
+                sc = sc + 3;
                 codigochilo += "0D" + GetDirection(Token.valor);
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
@@ -1041,7 +1044,8 @@ namespace Compile
         }
         private static bool isInstruction()
         {
-            return Token.index == 9 || // print
+            return Token.index == 41|| //printl
+                Token.index == 9 || // print
                 Token.index == 8 || // while
                 Token.index == 7 || // for
                 Token.index == 6 || // else
