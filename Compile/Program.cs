@@ -27,12 +27,13 @@ namespace Compile
         public static int[] JumpList = new int[50];
         static void Main(string[] args)
         {
-            string line = "{int a a=5 if(a==5){a=7} print(a) int b b=5 b=b+a if(b>3){print(b)}}";
+            string line = "{int a a=11 print(a)}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
             CreateFile();
             RunVM();
+            Console.WriteLine("LCOUNT" + LCount);
             Console.ReadLine();
         }
 
@@ -435,7 +436,7 @@ namespace Compile
             Console.WriteLine("SC: " + sc + "hex: "+ sc.ToString("X4"));
             codigochilo = "2843294348554E4B554E"+ directionSize + ""+ sc.ToString("X4") + "" + codigochilo;
             
-            for(int i=0;i<LCount;i++)
+            for(int i=0;i<=LCount;i++)
             {
                 codigochilo = codigochilo.Replace("replace"+i+"replace",JumpList[i].ToString("X4"));
             }
@@ -702,15 +703,20 @@ namespace Compile
             {
                 nextToken();
                 Console.WriteLine("L" + LCount + ":");
+                JumpList[LCount] = sc;
                 Match("OP");
                 BoolExpretion();
                 Match("CP");
                 Console.WriteLine(JumpHelper + " L" + (LCount+1));
+                JumpWriteCode(JumpHelper);
+                codigochilo += "replace" + (LCount+1)+ "replace";
                 sc = sc + 3;
                 Bloque();
                 Console.WriteLine("JMP L" + LCount );
-                sc=sc+3;
+                codigochilo +="30" + "replace" + LCount + "replace";
+                sc =sc+3;
                 Console.WriteLine("L" + (LCount +1) + ":");
+                JumpList[LCount+1] = sc;
                 LCount++;
 
             }
