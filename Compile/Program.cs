@@ -25,18 +25,31 @@ namespace Compile
         public static int sc = 0;
         public static string directionSize = "0000";
         public static int[] JumpList = new int[50];
+        public static string tipo = "";
         static void Main(string[] args)
         {
-            string line = "{int a a=1 while(a<12){a=a+1 print(a) printl}}";
+            string line = "{float a a = 1.5 print(a) }";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
             CreateFile();
             RunVM();
-            Console.WriteLine("LCOUNT" + LCount);
+            
+
+            //testing();
             Console.ReadLine();
         }
-
+        public static void testing()
+        {
+            Console.WriteLine("LCOUNT" + LCount);
+            float ef = 44.23F;
+            byte[] array = BitConverter.GetBytes(ef);
+            Console.WriteLine("/////" + array[0]);
+            Console.WriteLine(array[1]);
+            Console.WriteLine(array[2]);
+            Console.WriteLine(array[3] + "]]]]]]]");
+            Console.WriteLine(Convert.ToInt32(ef) + "ah");
+        }
         private static void CreateFile()
         {
             File.WriteAllBytes("vmcode.Chop", StringToByteArray(codigochilo));
@@ -117,7 +130,7 @@ namespace Compile
                     }
                     i--;
                     breakFlag = false;
-                    //tokensArray[count].index = checkNumber(word);
+                    tokensArray[count].index = checkNumber(word);
                     //tokensArray[count].index = 37;
                     tokensArray[count].valor = word;
                     count++;
@@ -406,8 +419,14 @@ namespace Compile
         }
         public static int checkNumber(string word)
         {
+            int count = 0;
+            for (int i = 0; i < word.Length; i++)
+                if (word[i] == '.')
+                    count++;
             if (IsDigitsOnly(word))
                 return 37;
+            else if (count == 1)
+                return 42;
             else
                 return 51;
         }
@@ -633,9 +652,10 @@ namespace Compile
             if (Token.index != 50)
                 Console.WriteLine("Error. No es una variable.");
             String nombre = Token.valor;
+            tipo = CheckVarTable();
             nextToken();
             Match("Eq");
-            if (Token.index == 37 || Token.index == 50 || Token.index == 11)
+            if ((Token.index == 37 || Token.index == 50 || Token.index == 11) && tipo=="int")
             {
                 BoolExpretion();
                 Console.WriteLine("POPI " + nombre);
@@ -647,6 +667,18 @@ namespace Compile
                 }
                 codigochilo += "1C" + lastDirection;
                 //codigochilo += "\n"; //testing purposes, must die eventually
+            }
+            else if ((Token.index == 37 || Token.index == 42  || Token.index == 50 || Token.index ==11) &&  tipo == "float")
+            {
+                BoolExpretion();
+                Console.WriteLine("POPF " + nombre);
+                sc = sc + 3;
+                lastDirection = GetDirection(nombre);
+                if (lastDirection == "-1")
+                {
+                    assignDirection(nombre);
+                }
+                codigochilo += "1D" + lastDirection;
             }
             else if (Token.index == 40)
             {
@@ -739,6 +771,7 @@ namespace Compile
         }
         private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
         {
+            Console.WriteLine("tipo a printear" + CheckVarTable());
             switch (CheckVarTable())
             {
                 case "char": // char
@@ -949,24 +982,60 @@ namespace Compile
         }
         public static void Terminal()
         {
-            if (Token.index == 37) //numero
+            if (tipo == "int")
             {
-                Console.WriteLine("PUSHKI " + Token.valor);
-                sc = sc + 5;
-                //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
-                //Console.WriteLine(" Este es el token valor:" + Token.valor);
-                //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
-                codigochilo += "17" + Int32.Parse(Token.valor).ToString("X4").PadLeft(8, '0');
-                //codigochilo += "\n"; //testing purposes, must die eventually
-                nextToken();
+                if (Token.index == 37) //numero
+                {
+                    Console.WriteLine("PUSHKI " + Token.valor);
+                    sc = sc + 5;
+                    //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
+                    //Console.WriteLine(" Este es el token valor:" + Token.valor);
+                    //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
+                    codigochilo += "17" + Int32.Parse(Token.valor).ToString("X4").PadLeft(8, '0');
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
+                else if (Token.index == 50) // variable
+                {
+                    Console.WriteLine("PUSHI " + Token.valor);
+                    sc = sc + 3;
+                    codigochilo += "0D" + GetDirection(Token.valor);
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
             }
-            else if (Token.index == 50) // variable
+            else if(tipo =="float")
             {
-                Console.WriteLine("PUSHI " + Token.valor);
-                sc = sc + 3;
-                codigochilo += "0D" + GetDirection(Token.valor);
-                //codigochilo += "\n"; //testing purposes, must die eventually
-                nextToken();
+                if (Token.index == 37 || Token.index == 42) //numero
+                {
+                    Console.WriteLine("PUSHKF " + Token.valor);
+                    sc = sc + 5;
+                    //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
+                    //Console.WriteLine(" Este es el token valor:" + Token.valor);
+                    //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
+                    string inp = Token.valor + "f";
+                    float f = float.Parse(Token.valor, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    Console.WriteLine("FFLOAT " + f);
+                    byte[] array = BitConverter.GetBytes(f);
+                    Console.WriteLine("/////" + array[0].ToString("X"));
+                    Console.WriteLine(array[1].ToString("X"));
+                    Console.WriteLine(array[2].ToString("X"));
+                    Console.WriteLine(array[3].ToString("X") + "]]]]]]]");
+                    string fstring = array[3].ToString("X2") + array[2].ToString("X2") + array[1].ToString("X2") + array[0].ToString("X2");
+
+                    Console.WriteLine("ESTE ES EL FLOAT EN HEXA" + fstring);
+                    codigochilo += "18" + fstring;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
+                else if (Token.index == 50) // variable
+                {
+                    Console.WriteLine("PUSHF " + Token.valor);
+                    sc = sc + 3;
+                    codigochilo += "0E" + GetDirection(Token.valor);
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
             }
             else if (Token.index == 11) // OP  (
             {
@@ -988,7 +1057,7 @@ namespace Compile
                 case "CB":
                     if (Token.index != 24)
                     {
-                        Console.WriteLine("Error. } esperado. ");
+                        Console.WriteLine("Error. } esperado. " + " Current token index: "  + Token.index);
                     }
                     break;
                 case "Eq":
@@ -1181,6 +1250,29 @@ namespace Compile
             Console.WriteLine("Token valor: " + Token.valor);
             Console.WriteLine("Token Count: " + tokenCount);
             Console.WriteLine("///Fin ///");
+        }
+        public static string Float2Hex(float fNum)
+        {
+            MemoryStream ms = new MemoryStream(sizeof(float));
+            StreamWriter sw = new StreamWriter(ms);
+
+            // Write the float to the stream
+            sw.Write(fNum);
+            sw.Flush();
+
+            // Re-read the stream
+            ms.Seek(0, SeekOrigin.Begin);
+            byte[] buffer = new byte[4];
+            ms.Read(buffer, 0, 4);
+
+            // Convert the buffer to Hex
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in buffer)
+                sb.AppendFormat("{0:X2}", b);
+
+            sw.Close();
+
+            return sb.ToString();
         }
     }
     class Tokens
