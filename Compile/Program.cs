@@ -28,27 +28,27 @@ namespace Compile
         public static string tipo = "";
         static void Main(string[] args)
         {
-            string line = "{float a a = 1.5 print(a) }";
+            string line = "{double a a =4 int b b = 3  a = a+b print(a) printl }";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
             CreateFile();
             RunVM();
-            
 
             //testing();
             Console.ReadLine();
         }
         public static void testing()
         {
-            Console.WriteLine("LCOUNT" + LCount);
-            float ef = 44.23F;
-            byte[] array = BitConverter.GetBytes(ef);
-            Console.WriteLine("/////" + array[0]);
-            Console.WriteLine(array[1]);
-            Console.WriteLine(array[2]);
-            Console.WriteLine(array[3] + "]]]]]]]");
-            Console.WriteLine(Convert.ToInt32(ef) + "ah");
+            double d = 1;
+            Console.WriteLine("Double value: " + d.ToString());
+            byte[] bytes = ConvertDoubleToByteArray(d);
+            Console.WriteLine("Byte array value:");
+            Console.WriteLine(BitConverter.ToString(bytes));
+        }
+        public static byte[] ConvertDoubleToByteArray(double d)
+        {
+            return BitConverter.GetBytes(d);
         }
         private static void CreateFile()
         {
@@ -680,6 +680,18 @@ namespace Compile
                 }
                 codigochilo += "1D" + lastDirection;
             }
+            else if((Token.index == 37 || Token.index == 42 || Token.index == 50 || Token.index == 11) && tipo == "double")
+            {
+                BoolExpretion();
+                Console.WriteLine("POPD " + nombre);
+                sc = sc + 3;
+                lastDirection = GetDirection(nombre);
+                if (lastDirection == "-1")
+                {
+                    assignDirection(nombre);
+                }
+                codigochilo += "1E" + lastDirection;
+            }
             else if (Token.index == 40)
             {
                 Console.WriteLine("PUSHKC " + Token.valor);
@@ -771,7 +783,6 @@ namespace Compile
         }
         private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
         {
-            Console.WriteLine("tipo a printear" + CheckVarTable());
             switch (CheckVarTable())
             {
                 case "char": // char
@@ -1010,20 +1021,9 @@ namespace Compile
                 {
                     Console.WriteLine("PUSHKF " + Token.valor);
                     sc = sc + 5;
-                    //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
-                    //Console.WriteLine(" Este es el token valor:" + Token.valor);
-                    //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
-                    string inp = Token.valor + "f";
                     float f = float.Parse(Token.valor, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                    Console.WriteLine("FFLOAT " + f);
                     byte[] array = BitConverter.GetBytes(f);
-                    Console.WriteLine("/////" + array[0].ToString("X"));
-                    Console.WriteLine(array[1].ToString("X"));
-                    Console.WriteLine(array[2].ToString("X"));
-                    Console.WriteLine(array[3].ToString("X") + "]]]]]]]");
                     string fstring = array[3].ToString("X2") + array[2].ToString("X2") + array[1].ToString("X2") + array[0].ToString("X2");
-
-                    Console.WriteLine("ESTE ES EL FLOAT EN HEXA" + fstring);
                     codigochilo += "18" + fstring;
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
@@ -1033,6 +1033,30 @@ namespace Compile
                     Console.WriteLine("PUSHF " + Token.valor);
                     sc = sc + 3;
                     codigochilo += "0E" + GetDirection(Token.valor);
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
+            }
+            else if (tipo== "double")
+            {
+                if (Token.index == 37 || Token.index == 42) //numero
+                {
+                    Console.WriteLine("PUSHKD " + Token.valor);
+                    sc = sc + 9;
+                    double d = double.Parse(Token.valor, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                    byte[] array = BitConverter.GetBytes(d);
+                    string dstring = array[7].ToString("X2") + array[6].ToString("X2") + array[5].ToString("X2") + array[4].ToString("X2") + array[3].ToString("X2") + array[2].ToString("X2") + array[1].ToString("X2") + array[0].ToString("X2");
+                    
+                    Console.WriteLine(">>Array:  " + dstring);
+                    codigochilo += "19" + dstring;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                    nextToken();
+                }
+                else if (Token.index == 50) // variable
+                {
+                    Console.WriteLine("PUSHD " + Token.valor);
+                    sc = sc + 3;
+                    codigochilo += "0F" + GetDirection(Token.valor);
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
                 }
@@ -1181,7 +1205,7 @@ namespace Compile
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
                         directionSize = varTable[i].direction;
-                        directionHelper = directionHelper + 4;
+                        directionHelper = directionHelper + 8;
                     }
                     if (varTable[i].type == "double")
                     {
