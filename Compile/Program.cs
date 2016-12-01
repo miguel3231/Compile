@@ -21,14 +21,14 @@ namespace Compile
         public static string JumpHelper = "";
         public static int directionHelper = 0;
         public static string lastDirection = "";
-        public static int StringLength = 0;
+        public static string StringLength;
         public static int sc = 0;
         public static string directionSize = "0000";
         public static int[] JumpList = new int[50];
         public static string tipo = "";
         static void Main(string[] args)
         {
-            string line = "{double a a =4 int b b = 3  a = a+b print(a) printl }";
+            string line = "{string a,4 a=\"caca\" print(a) printl }";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -528,10 +528,22 @@ namespace Compile
                     if (Token.index == 50)
                     {
                         varTable[varCount] = new Variables();
-                        Console.WriteLine("DEFS " + Token.valor + ", 50");
+                        Console.Write("DEFS " + Token.valor + ",");
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "string";
                         varTable[varCount].isArray = false;
+                        nextToken();
+                        Match(",");
+                        if(Token.index == 37)
+                        {
+                            varTable[varCount].length = Token.valor;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error. Numero esperado.");
+                        }
+                        Console.WriteLine(Token.valor);
+
                         varCount++;
                     }
                     else if (Token.index == 25)
@@ -652,7 +664,7 @@ namespace Compile
             if (Token.index != 50)
                 Console.WriteLine("Error. No es una variable.");
             String nombre = Token.valor;
-            tipo = CheckVarTable();
+            tipo = CheckVarTable(Token. valor, "type");
             nextToken();
             Match("Eq");
             if ((Token.index == 37 || Token.index == 50 || Token.index == 11) && tipo=="int")
@@ -663,7 +675,7 @@ namespace Compile
                 lastDirection = GetDirection(nombre);
                 if (lastDirection == "-1")
                 {
-                    assignDirection(nombre);
+                    assignDirection(nombre, "");
                 }
                 codigochilo += "1C" + lastDirection;
                 //codigochilo += "\n"; //testing purposes, must die eventually
@@ -676,7 +688,7 @@ namespace Compile
                 lastDirection = GetDirection(nombre);
                 if (lastDirection == "-1")
                 {
-                    assignDirection(nombre);
+                    assignDirection(nombre, "");
                 }
                 codigochilo += "1D" + lastDirection;
             }
@@ -688,7 +700,7 @@ namespace Compile
                 lastDirection = GetDirection(nombre);
                 if (lastDirection == "-1")
                 {
-                    assignDirection(nombre);
+                    assignDirection(nombre, "");
                 }
                 codigochilo += "1E" + lastDirection;
             }
@@ -702,7 +714,7 @@ namespace Compile
                 lastDirection = GetDirection(nombre);
                 if (lastDirection == "-1")
                 {
-                    assignDirection(nombre);
+                    assignDirection(nombre, "");
                 }
                 codigochilo += "1B" + lastDirection;
                 nextToken();
@@ -710,18 +722,20 @@ namespace Compile
             else if (Token.index == 39)
             {
                 Console.WriteLine("PUSHKS " + Token.valor);
-                sc++; // pending
-                codigochilo += "1A50" + ConvertStringtoHexa(Token.valor).PadLeft(Token.valor.Length * 2, '0');
-                sc++;
-                StringLength = Token.valor.Length;
+                StringLength = CheckVarTable(nombre, "length");
+                //codigochilo += "\n"; // string testing purposes, must die eventually
+                codigochilo += "1A" +  StringLength.PadLeft(2,'0') + ConvertStringtoHexa(Token.valor).PadLeft(Int32.Parse(StringLength) * 2, '0');
+                //codigochilo += "\n"; // string testing purposes, must die eventually
+                sc = 2 + Int32.Parse(StringLength);
                 Console.WriteLine("POPS" + nombre);
                 sc = sc + 3;
                 lastDirection = GetDirection(nombre);
                 if (lastDirection == "-1")
                 {
-                    assignDirection(nombre);
+                    assignDirection(nombre, "");
                 }
                 codigochilo += "1F" + lastDirection;
+                // codigochilo += "\n"; //string testing purposes, must die eventually
                 nextToken();
             }
         }
@@ -783,7 +797,7 @@ namespace Compile
         }
         private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
         {
-            switch (CheckVarTable())
+            switch (CheckVarTable(Token.valor, "type"))
             {
                 case "char": // char
                     Console.WriteLine("PRTC " + Token.valor);
@@ -1108,6 +1122,12 @@ namespace Compile
                         Console.WriteLine("Error. ] esperado.");
                     }
                     break;
+                case ",":
+                    if(Token.index !=30)
+                    {
+                        Console.WriteLine("Error. , esperado.");
+                    }
+                    break;
             }
             nextToken();
 
@@ -1151,18 +1171,21 @@ namespace Compile
             tokenCount++;
             Token = tokensArray[tokenCount];
         }
-        public static string CheckVarTable()
+        public static string CheckVarTable(string token, string request)
         {
             bool found = false;
             //Console.WriteLine("varCount " + varCount);
             for (int i = 0; i < varCount; i++)
             {
                // Console.WriteLine("Se compararon estos: " + Token.valor + "    y    "  + varTable[i].name);
-                if(Token.valor == varTable[i].name)
+                if(token == varTable[i].name)
                 {
                     found = true;
                     //Console.WriteLine("///Found");
-                    return varTable[i].type;
+                    if (request == "type")
+                        return varTable[i].type;
+                    else if (request == "length")
+                        return varTable[i].length;
                     
                 }
             }
@@ -1172,7 +1195,7 @@ namespace Compile
             }
             return "null";
         }
-        public static void assignDirection(string name)
+        public static void assignDirection(string name, string length)
         {
             bool found = false;
             for (int i = 0; i < varCount && found==false; i++)
@@ -1192,7 +1215,7 @@ namespace Compile
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
                         directionSize = varTable[i].direction;
-                        directionHelper = directionHelper + StringLength;
+                        directionHelper = directionHelper + Int32.Parse(StringLength);
 
                     }
                     if (varTable[i].type == "int")
@@ -1321,6 +1344,7 @@ namespace Compile
         public string direction { get; set; }
         public bool isArray  { get; set; }
         public bool initialized { get; set; }
+        public string length { get; set; }
         public Variables()
         {
             name = "noname";
@@ -1328,6 +1352,7 @@ namespace Compile
             isArray = false;
             initialized = false;
             direction = "-1";
+            length = "-1";
         }
 
     }
