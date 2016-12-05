@@ -28,7 +28,7 @@ namespace Compile
         public static string tipo = "";
         static void Main(string[] args)
         {
-            string line = "{string a,4 a=\"caca\" print(a) printl }";
+            string line = "{int[5] x x[2]=3 print(x[2]) printl }";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -508,7 +508,7 @@ namespace Compile
                     else if (Token.index == 25)
                     {
                         varTable[varCount] = new Variables();
-                        nextToken();
+                        Match("[");
                         if (Token.index != 37)
                             Console.WriteLine("Error. Number expected in [ ].");
                         string number = Token.valor;
@@ -589,6 +589,7 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "intArray";
                         varTable[varCount].isArray = true;
+                        varTable[varCount].length = number;
                         varCount++;
                     }
                     break;
@@ -666,77 +667,111 @@ namespace Compile
             String nombre = Token.valor;
             tipo = CheckVarTable(Token. valor, "type");
             nextToken();
-            Match("Eq");
-            if ((Token.index == 37 || Token.index == 50 || Token.index == 11) && tipo=="int")
+            if (Token.index == 27) //igual
             {
-                BoolExpretion();
-                Console.WriteLine("POPI " + nombre);
-                sc = sc + 3;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre, "");
-                }
-                codigochilo += "1C" + lastDirection;
-                //codigochilo += "\n"; //testing purposes, must die eventually
-            }
-            else if ((Token.index == 37 || Token.index == 42  || Token.index == 50 || Token.index ==11) &&  tipo == "float")
-            {
-                BoolExpretion();
-                Console.WriteLine("POPF " + nombre);
-                sc = sc + 3;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre, "");
-                }
-                codigochilo += "1D" + lastDirection;
-            }
-            else if((Token.index == 37 || Token.index == 42 || Token.index == 50 || Token.index == 11) && tipo == "double")
-            {
-                BoolExpretion();
-                Console.WriteLine("POPD " + nombre);
-                sc = sc + 3;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre, "");
-                }
-                codigochilo += "1E" + lastDirection;
-            }
-            else if (Token.index == 40)
-            {
-                Console.WriteLine("PUSHKC " + Token.valor);
-                sc = sc + 2;
-                codigochilo += "16" + ConvertStringtoHexa(Token.valor);
-                Console.WriteLine("POPC " + nombre);
-                sc = sc + 3;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
-                {
-                    assignDirection(nombre, "");
-                }
-                codigochilo += "1B" + lastDirection;
                 nextToken();
-            }
-            else if (Token.index == 39)
-            {
-                Console.WriteLine("PUSHKS " + Token.valor);
-                StringLength = CheckVarTable(nombre, "length");
-                //codigochilo += "\n"; // string testing purposes, must die eventually
-                codigochilo += "1A" +  StringLength.PadLeft(2,'0') + ConvertStringtoHexa(Token.valor).PadLeft(Int32.Parse(StringLength) * 2, '0');
-                //codigochilo += "\n"; // string testing purposes, must die eventually
-                sc = 2 + Int32.Parse(StringLength);
-                Console.WriteLine("POPS" + nombre);
-                sc = sc + 3;
-                lastDirection = GetDirection(nombre);
-                if (lastDirection == "-1")
+                if ((Token.index == 37 || Token.index == 50 || Token.index == 11) && tipo == "int")
                 {
-                    assignDirection(nombre, "");
+                    Console.WriteLine("INDEX " + Token.index);
+                    BoolExpretion();
+                    Console.WriteLine("POPI " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1C" + lastDirection;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
                 }
-                codigochilo += "1F" + lastDirection;
-                // codigochilo += "\n"; //string testing purposes, must die eventually
-                nextToken();
+                
+                else if ((Token.index == 37 || Token.index == 42 || Token.index == 50 || Token.index == 11) && tipo == "float")
+                {
+                    BoolExpretion();
+                    Console.WriteLine("POPF " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1D" + lastDirection;
+                }
+                else if ((Token.index == 37 || Token.index == 42 || Token.index == 50 || Token.index == 11) && tipo == "double")
+                {
+                    BoolExpretion();
+                    Console.WriteLine("POPD " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1E" + lastDirection;
+                }
+                else if (Token.index == 40)
+                {
+                    Console.WriteLine("PUSHKC " + Token.valor);
+                    sc = sc + 2;
+                    codigochilo += "16" + ConvertStringtoHexa(Token.valor);
+                    Console.WriteLine("POPC " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1B" + lastDirection;
+                    nextToken();
+                }
+                else if (Token.index == 39)
+                {
+                    Console.WriteLine("PUSHKS " + Token.valor);
+                    StringLength = CheckVarTable(nombre, "length");
+                    //codigochilo += "\n"; // string testing purposes, must die eventually
+                    codigochilo += "1A" + StringLength.PadLeft(2, '0') + ConvertStringtoHexa(Token.valor).PadLeft(Int32.Parse(StringLength) * 2, '0');
+                    //codigochilo += "\n"; // string testing purposes, must die eventually
+                    sc = 2 + Int32.Parse(StringLength);
+                    Console.WriteLine("POPS" + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1F" + lastDirection;
+                    // codigochilo += "\n"; //string testing purposes, must die eventually
+                    nextToken();
+                }
+            }
+            else if(Token.index == 25)//array
+            {
+                if (tipo == "intArray") //work
+                {
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "intArray";
+                    Console.WriteLine("POPY");
+                    codigochilo += "43";
+                    sc++;
+                    Match("]");
+                    Match("Eq"); //=
+
+                    BoolExpretion();
+                    Console.WriteLine("MOVY");
+                    codigochilo += "42";
+                    sc++;
+                    Console.WriteLine("POPAI " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "22" + lastDirection;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                }
             }
         }
         private static void DoInstruction()
@@ -784,7 +819,6 @@ namespace Compile
                 Match("OP");
                 PreparePrint();
                 Match("CP");
-                //Console.WriteLine("prtcr");
             }
             else if (Token.index == 41) //printl
             {
@@ -795,8 +829,9 @@ namespace Compile
                 nextToken();
             }
         }
-        private static void PreparePrint() // aqui buscamos que tipo de print se hace, falta la var table
+        private static void PreparePrint() // aqui buscamos que tipo de print se hace
         {
+            string nombre;
             switch (CheckVarTable(Token.valor, "type"))
             {
                 case "char": // char
@@ -831,9 +866,18 @@ namespace Compile
                     nextToken();
                     break;
                 case "intArray":
-                    Console.WriteLine("PRTAI " + Token.valor);
-                    sc = sc + 3;
+                    nombre = Token.valor;
                     nextToken();
+                    Match("[");
+                    BoolExpretion();
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("PRTAI " + nombre);
+                    codigochilo += "08" + GetDirection(nombre);
+                    sc = sc + 3;
+                    //nextToken();
                     break;
                 case "float": //float
                     Console.WriteLine("PRTF " + Token.valor);
@@ -1007,7 +1051,7 @@ namespace Compile
         }
         public static void Terminal()
         {
-            if (tipo == "int")
+            if (tipo == "int" || tipo=="intArray")
             {
                 if (Token.index == 37) //numero
                 {
@@ -1114,6 +1158,12 @@ namespace Compile
                     if (Token.index != 12)
                     {
                         Console.WriteLine("Error. ) esperado.");
+                    }
+                    break;
+                case "[":
+                    if (Token.index != 25)
+                    {
+                        Console.WriteLine("Error. [ esperado.");
                     }
                     break;
                 case "]":
