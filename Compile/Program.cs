@@ -26,9 +26,10 @@ namespace Compile
         public static string directionSize = "0000";
         public static int[] JumpList = new int[50];
         public static string tipo = "";
+
         static void Main(string[] args)
         {
-            string line = "{int[5] x x[2]=3 print(x[2]) printl }";
+            string line = "{double[3] a a[1]=2 print(a[1])  }";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -520,6 +521,7 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "charArray";
                         varTable[varCount].isArray = true;
+                        varTable[varCount].size = Int32.Parse(number);
                         varCount++;
                     }
                     break;
@@ -561,6 +563,18 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "stringArray";
                         varTable[varCount].isArray = true;
+                        varTable[varCount].size = Int32.Parse(number);
+                        nextToken();
+                        Match(",");
+                        if (Token.index == 37)
+                        {
+                            varTable[varCount].length = Token.valor;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error. Numero esperado.");
+                        }
+                        Console.WriteLine(Token.valor);
                         varCount++;
                     }
                     break;
@@ -589,7 +603,7 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "intArray";
                         varTable[varCount].isArray = true;
-                        varTable[varCount].length = number;
+                        varTable[varCount].size = Int32.Parse(number);
                         varCount++;
                     }
                     break;
@@ -619,6 +633,7 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "floatArray";
                         varTable[varCount].isArray = true;
+                        varTable[varCount].size = Int32.Parse(number);
                         varCount++;
                     }
                     break;
@@ -649,6 +664,7 @@ namespace Compile
                         varTable[varCount].name = Token.valor;
                         varTable[varCount].type = "doubleArray";
                         varTable[varCount].isArray = true;
+                        varTable[varCount].size = Int32.Parse(number);
                         varCount++;
                     }
                     break;
@@ -672,7 +688,6 @@ namespace Compile
                 nextToken();
                 if ((Token.index == 37 || Token.index == 50 || Token.index == 11) && tipo == "int")
                 {
-                    Console.WriteLine("INDEX " + Token.index);
                     BoolExpretion();
                     Console.WriteLine("POPI " + nombre);
                     sc = sc + 3;
@@ -746,7 +761,7 @@ namespace Compile
             }
             else if(Token.index == 25)//array
             {
-                if (tipo == "intArray") //work
+                if (tipo == "intArray") 
                 {
                     Match("[");
                     tipo = "int";
@@ -770,6 +785,58 @@ namespace Compile
                         assignDirection(nombre, "");
                     }
                     codigochilo += "22" + lastDirection;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                }
+                else if (tipo == "floatArray")
+                {
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "floatArray";
+                    Console.WriteLine("POPY");
+                    codigochilo += "43";
+                    sc++;
+                    Match("]");
+                    Match("Eq"); //=
+
+                    BoolExpretion();
+                    Console.WriteLine("MOVY");
+                    codigochilo += "42";
+                    sc++;
+                    Console.WriteLine("POPAF " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "23" + lastDirection;
+                    //codigochilo += "\n"; //testing purposes, must die eventually
+                }
+                else if (tipo == "doubleArray")
+                {
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "doubleArray";
+                    Console.WriteLine("POPY");
+                    codigochilo += "43";
+                    sc++;
+                    Match("]");
+                    Match("Eq"); //=
+
+                    BoolExpretion();
+                    Console.WriteLine("MOVY");
+                    codigochilo += "42";
+                    sc++;
+                    Console.WriteLine("POPAD " + nombre);
+                    sc = sc + 5;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "24" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
                 }
             }
@@ -886,9 +953,20 @@ namespace Compile
                     nextToken();
                     break;
                 case "floatArray":
-                    Console.WriteLine("PRTAF " + Token.valor);
-                    sc = sc + 3;
+                    nombre = Token.valor;
                     nextToken();
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "floatArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("PRTAF " + nombre);
+                    codigochilo += "09" + GetDirection(nombre);
+                    sc = sc + 3;
+                    //nextToken();
                     break;
                 case "double": //double
                     Console.WriteLine("PRTD " + Token.valor);
@@ -897,9 +975,20 @@ namespace Compile
                     nextToken();
                     break;
                 case "doubleArray":
-                    Console.WriteLine("PRTAD " + Token.valor);
-                    sc = sc + 3;
+                    nombre = Token.valor;
                     nextToken();
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "doubleArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("PRTAD " + nombre);
+                    codigochilo += "0A" + GetDirection(nombre);
+                    sc = sc + 3;
+                    //nextToken();
                     break;
                 default:
                     Console.WriteLine("Error. Variable no reconocida.");
@@ -1057,9 +1146,6 @@ namespace Compile
                 {
                     Console.WriteLine("PUSHKI " + Token.valor);
                     sc = sc + 5;
-                    //codigochilo += "17" + ConvertStringtoHexa(Token.valor).PadLeft(8, '0');
-                    //Console.WriteLine(" Este es el token valor:" + Token.valor);
-                    //Console.WriteLine(" Y su hexa: " + ConvertStringtoHexa(Token.valor));
                     codigochilo += "17" + Int32.Parse(Token.valor).ToString("X4").PadLeft(8, '0');
                     //codigochilo += "\n"; //testing purposes, must die eventually
                     nextToken();
@@ -1073,7 +1159,7 @@ namespace Compile
                     nextToken();
                 }
             }
-            else if(tipo =="float")
+            else if(tipo =="float" || tipo=="floatArray")
             {
                 if (Token.index == 37 || Token.index == 42) //numero
                 {
@@ -1095,7 +1181,7 @@ namespace Compile
                     nextToken();
                 }
             }
-            else if (tipo== "double")
+            else if (tipo== "double" || tipo =="doubleArray")
             {
                 if (Token.index == 37 || Token.index == 42) //numero
                 {
@@ -1236,7 +1322,7 @@ namespace Compile
                         return varTable[i].type;
                     else if (request == "length")
                         return varTable[i].length;
-                    
+
                 }
             }
             if(found== false)
@@ -1274,17 +1360,35 @@ namespace Compile
                         directionSize = varTable[i].direction;
                         directionHelper = directionHelper + 4;
                     }
+                    if (varTable[i].type == "intArray")
+                    {
+                        varTable[i].direction = directionHelper.ToString("X4");
+                        directionSize = varTable[i].direction;
+                        directionHelper = directionHelper + varTable[i].size*4;
+                    }
                     if (varTable[i].type == "float")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
                         directionSize = varTable[i].direction;
-                        directionHelper = directionHelper + 8;
+                        directionHelper = directionHelper + 4;
+                    }
+                    if (varTable[i].type == "floatArray")
+                    {
+                        varTable[i].direction = directionHelper.ToString("X4");
+                        directionSize = varTable[i].direction;
+                        directionHelper = directionHelper + varTable[i].size*4;
                     }
                     if (varTable[i].type == "double")
                     {
                         varTable[i].direction = directionHelper.ToString("X4");
                         directionSize = varTable[i].direction;
-                        directionHelper = directionHelper + 4;
+                        directionHelper = directionHelper + 8;
+                    }
+                    if (varTable[i].type == "doubleArray")
+                    {
+                        varTable[i].direction = directionHelper.ToString("X4");
+                        directionSize = varTable[i].direction;
+                        directionHelper = directionHelper + varTable[i].size * 8;
                     }
                     lastDirection = varTable[i].direction;
                     //Console.WriteLine("pup" + varTable[i].direction);
@@ -1395,6 +1499,7 @@ namespace Compile
         public bool isArray  { get; set; }
         public bool initialized { get; set; }
         public string length { get; set; }
+        public int size { get; set; }
         public Variables()
         {
             name = "noname";
@@ -1403,6 +1508,7 @@ namespace Compile
             initialized = false;
             direction = "-1";
             length = "-1";
+            size = -1;
         }
 
     }
