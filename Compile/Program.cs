@@ -29,7 +29,7 @@ namespace Compile
 
         static void Main(string[] args)
         {
-            string line = "{double[3] a a[1]=2 print(a[1])  }";
+            string line = "{float a a=5 float b b=a print(b)}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -680,7 +680,7 @@ namespace Compile
         {
             if (Token.index != 50)
                 Console.WriteLine("Error. No es una variable.");
-            String nombre = Token.valor;
+            string nombre = Token.valor;
             tipo = CheckVarTable(Token. valor, "type");
             nextToken();
             if (Token.index == 27) //igual
@@ -739,6 +739,21 @@ namespace Compile
                     codigochilo += "1B" + lastDirection;
                     nextToken();
                 }
+                else if(Token.index == 50 && tipo=="char")
+                {
+                    Console.WriteLine("PUSHC " + Token.valor);
+                    sc = sc + 2;
+                    codigochilo += "0C" + GetDirection(Token.valor);
+                    Console.WriteLine("POPC " + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1B" + lastDirection;
+                    nextToken();
+                }
                 else if (Token.index == 39)
                 {
                     Console.WriteLine("PUSHKS " + Token.valor);
@@ -746,7 +761,25 @@ namespace Compile
                     //codigochilo += "\n"; // string testing purposes, must die eventually
                     codigochilo += "1A" + StringLength.PadLeft(2, '0') + ConvertStringtoHexa(Token.valor).PadLeft(Int32.Parse(StringLength) * 2, '0');
                     //codigochilo += "\n"; // string testing purposes, must die eventually
-                    sc = 2 + Int32.Parse(StringLength);
+                    sc = sc + 2 + Int32.Parse(StringLength);
+                    Console.WriteLine("POPS" + nombre);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre, "");
+                    }
+                    codigochilo += "1F" + lastDirection;
+                    // codigochilo += "\n"; //string testing purposes, must die eventually
+                    nextToken();
+                }
+                else if(Token.index == 50 && tipo=="string")
+                {
+                    Console.WriteLine("PUSHS " + Token.valor);
+                    //codigochilo += "\n"; // string testing purposes, must die eventually
+                    codigochilo += "10" + GetDirection(Token.valor);
+                    //codigochilo += "\n"; // string testing purposes, must die eventually
+                    sc = sc +3;
                     Console.WriteLine("POPS" + nombre);
                     sc = sc + 3;
                     lastDirection = GetDirection(nombre);
@@ -763,6 +796,7 @@ namespace Compile
             {
                 if (tipo == "intArray") 
                 {
+                    Console.WriteLine(" Hey.");
                     Match("[");
                     tipo = "int";
                     BoolExpretion();
@@ -772,8 +806,9 @@ namespace Compile
                     sc++;
                     Match("]");
                     Match("Eq"); //=
-
+                    Console.WriteLine("Time to do the right side.");
                     BoolExpretion();
+                    Console.WriteLine("Right side done.");
                     Console.WriteLine("MOVY");
                     codigochilo += "42";
                     sc++;
@@ -1152,11 +1187,32 @@ namespace Compile
                 }
                 else if (Token.index == 50) // variable
                 {
-                    Console.WriteLine("PUSHI " + Token.valor);
-                    sc = sc + 3;
-                    codigochilo += "0D" + GetDirection(Token.valor);
-                    //codigochilo += "\n"; //testing purposes, must die eventually
-                    nextToken();
+                    if (CheckVarTable(Token.valor, "type") =="int")
+                    {
+                        Console.WriteLine("PUSHI " + Token.valor);
+                        sc = sc + 3;
+                        codigochilo += "0D" + GetDirection(Token.valor);
+                        //codigochilo += "\n"; //testing purposes, must die eventually
+                        nextToken();
+                    }
+                    else if(CheckVarTable(Token.valor, "type") == "intArray")
+                    {
+                        string nombre = Token.valor;
+                        nextToken();
+                        Match("[");
+                        tipo = "int";
+                        BoolExpretion();
+                        tipo = "intArray";
+                        Console.WriteLine("POPX");
+                        codigochilo += "20";
+                        sc++;
+                        
+                        Console.WriteLine("PUSHAI " + nombre);
+                        sc = sc + 3;
+                        codigochilo += "12" + GetDirection(nombre);
+                        //nextToken();
+                        Match("]");
+                    }
                 }
             }
             else if(tipo =="float" || tipo=="floatArray")
@@ -1174,11 +1230,32 @@ namespace Compile
                 }
                 else if (Token.index == 50) // variable
                 {
-                    Console.WriteLine("PUSHF " + Token.valor);
-                    sc = sc + 3;
-                    codigochilo += "0E" + GetDirection(Token.valor);
-                    //codigochilo += "\n"; //testing purposes, must die eventually
-                    nextToken();
+                    if (CheckVarTable(Token.valor, "type") == "float")
+                    {
+                        Console.WriteLine("PUSHF " + Token.valor);
+                        sc = sc + 3;
+                        codigochilo += "0E" + GetDirection(Token.valor);
+                        //codigochilo += "\n"; //testing purposes, must die eventually
+                        nextToken();
+                    }
+                    else if (CheckVarTable(Token.valor, "type") == "floatArray")
+                    {
+                        string nombre = Token.valor;
+                        nextToken();
+                        Match("[");
+                        tipo = "int";
+                        BoolExpretion();
+                        tipo = "floatArray";
+                        Console.WriteLine("POPX");
+                        codigochilo += "20";
+                        sc++;
+
+                        Console.WriteLine("PUSHAF " + nombre);
+                        sc = sc + 3;
+                        codigochilo += "13" + GetDirection(nombre);
+                        //nextToken();
+                        Match("]");
+                    }
                 }
             }
             else if (tipo== "double" || tipo =="doubleArray")
@@ -1198,11 +1275,32 @@ namespace Compile
                 }
                 else if (Token.index == 50) // variable
                 {
-                    Console.WriteLine("PUSHD " + Token.valor);
-                    sc = sc + 3;
-                    codigochilo += "0F" + GetDirection(Token.valor);
-                    //codigochilo += "\n"; //testing purposes, must die eventually
-                    nextToken();
+                    if (CheckVarTable(Token.valor, "type") == "double")
+                    {
+                        Console.WriteLine("PUSHD " + Token.valor);
+                        sc = sc + 3;
+                        codigochilo += "0F" + GetDirection(Token.valor);
+                        //codigochilo += "\n"; //testing purposes, must die eventually
+                        nextToken();
+                    }
+                    if (CheckVarTable(Token.valor, "type") == "doubleArray")
+                    {
+                        string nombre = Token.valor;
+                        nextToken();
+                        Match("[");
+                        tipo = "int";
+                        BoolExpretion();
+                        tipo = "doubleArray";
+                        Console.WriteLine("POPX");
+                        codigochilo += "20";
+                        sc++;
+
+                        Console.WriteLine("PUSHAD " + nombre);
+                        sc = sc + 3;
+                        codigochilo += "14" + GetDirection(nombre);
+                        //nextToken();
+                        Match("]");
+                    }
                 }
             }
             else if (Token.index == 11) // OP  (
