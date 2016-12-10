@@ -29,6 +29,7 @@ namespace Compile
 
         static void Main(string[] args)
         {
+            string line = "{ double[5] a read(a[1]) print(a[1]) read(a[0]) }";
             //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0])
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
@@ -41,6 +42,7 @@ namespace Compile
         }
         public static void testing()
         {
+            //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0]) //bgu
             double d = 1;
             Console.WriteLine("Double value: " + d.ToString());
             byte[] bytes = ConvertDoubleToByteArray(d);
@@ -381,14 +383,34 @@ namespace Compile
         public static int checkWord(string word)
         {
             bool errorFlag = false;
-
+            int count = 0;
             foreach (char c in word)
             {
-                if (Char.IsLetter(c) == false || Char.IsNumber(c))
-                    errorFlag = true;
+                if (count == 0)
+                {
+                    if (Char.IsLetter(c) == false || Char.IsNumber(c))
+                    {
+                        errorFlag = true;
+                        Console.WriteLine("Aqui " + c);
+                        Console.WriteLine("1: " + Char.IsLetter(c) == false + " 2: " + Char.IsNumber(c));
+                    }
+                    count++;
+                    
+                }
+                else
+                {
+                    if (Char.IsLetter(c) == false && Char.IsNumber(c) == false)
+                    {
+                        errorFlag = true;
+                        Console.WriteLine("Aqui " + c);
+                        Console.WriteLine("1: " + Char.IsLetter(c) == false + " 2: " + Char.IsNumber(c)==false);
+                    }
+                    
+                }
             }
             if (errorFlag == true)
             {
+                Console.WriteLine("yep");
                 return 51;
             }
             else if (word == "char")
@@ -695,7 +717,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "1C" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
@@ -709,7 +731,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "1D" + lastDirection;
                 }
@@ -721,7 +743,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "1E" + lastDirection;
                 }
@@ -733,7 +755,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "1B" + lastDirection;
                 }
@@ -749,7 +771,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "1F" + lastDirection;
                     // codigochilo += "\n"; //string testing purposes, must die eventually
@@ -779,7 +801,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "22" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
@@ -805,7 +827,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "23" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
@@ -831,7 +853,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "24" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
@@ -858,7 +880,7 @@ namespace Compile
                     if (lastDirection == "-1")
                     {
                         
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "21" + lastDirection;
 
@@ -885,7 +907,7 @@ namespace Compile
                     lastDirection = GetDirection(nombre);
                     if (lastDirection == "-1")
                     {
-                        assignDirection(nombre, "");
+                        assignDirection(nombre);
                     }
                     codigochilo += "25" + lastDirection;
 
@@ -946,8 +968,15 @@ namespace Compile
                 //codigochilo += "\n"; //testing purposes, must die eventually
                 nextToken();
             }
+            else if(Token.index == 10) //read
+            {
+                nextToken();
+                Match("OP");
+                DoRead();
+                Match("CP");
+            }
         }
-        private static void PreparePrint() // aqui buscamos que tipo de print se hace
+        private static void PreparePrint() 
         {
             string nombre;
             switch (CheckVarTable(Token.valor, "type"))
@@ -1066,8 +1095,157 @@ namespace Compile
                     break;
             }
         }
+        public static void DoRead()
+        {
+            tipo = CheckVarTable(Token.valor, "type");
+            string nombre;
+            switch (tipo)
+            {
+                case "int":
+                    Console.WriteLine("READI " + Token.valor);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(Token.valor);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(Token.valor);
+                    }
+                    codigochilo += "27" + lastDirection;
+                    nextToken();
+                    break;
+                case "intArray": //read(a[0])
+                    nombre = Token.valor;
+                    nextToken();
+                    Match("[");
+                    tipo = "int";
+                    Console.WriteLine("tipo1  " + tipo );
+                    BoolExpretion();
+                    tipo = "intArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("READAI " + nombre);
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre);
+                    }
+                    codigochilo += "2C" + lastDirection;
+                    sc = sc + 3;
+                    break;
+                case "float":
+                    Console.WriteLine("READF " + Token.valor);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(Token.valor);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(Token.valor);
+                    }
+                    codigochilo += "28" + lastDirection;
+                    nextToken();
+                    break;
+                case "floatArray":
+                    nombre = Token.valor;
+                    nextToken();
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "floatArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("READAF " + nombre);
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre);
+                    }
+                    codigochilo += "2D" + lastDirection;
+                    sc = sc + 3;
+                    break;
+                case "double":
+                    Console.WriteLine("READD " + Token.valor);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(Token.valor);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(Token.valor);
+                    }
+                    codigochilo += "29" + lastDirection;
+                    nextToken();
+                    break;
+                case "doubleArray":
+                    nombre = Token.valor;
+                    nextToken();
+                    Match("[");
+                    tipo = "int";
+                    Console.WriteLine("tipo1  " + tipo);
+                    BoolExpretion();
+                    tipo = "doubleArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("READAD " + nombre);
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre);
+                    }
+                    codigochilo += "2E" + lastDirection;
+                    sc = sc + 3;
+                    break;
+                case "char":
+                    Console.WriteLine("READC " + Token.valor);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(Token.valor);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(Token.valor);
+                    }
+                    codigochilo += "26" + lastDirection;
+                    nextToken();
+                    break;
+                case "charArray":
+                    nombre = Token.valor;
+                    nextToken();
+                    Match("[");
+                    tipo = "int";
+                    Console.WriteLine("tipo1  " + tipo);
+                    BoolExpretion();
+                    tipo = "charArray";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("READAC " + nombre);
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre);
+                    }
+                    codigochilo += "2B" + lastDirection;
+                    sc = sc + 3;
+                    break;
+                case "string":
+                    Console.WriteLine("READS " + Token.valor);
+                    sc = sc + 3;
+                    lastDirection = GetDirection(Token.valor);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(Token.valor);
+                    }
+                    codigochilo += "2A" + lastDirection;
+                    nextToken();
+                    break;
+
+            }
+            
+        }
         public static void BoolExpretion()
         {
+            Console.WriteLine("Eltipo3 " + tipo);
             Comparison();
             while (Token.index == 31 || Token.index == 32)
             {
@@ -1210,6 +1388,7 @@ namespace Compile
         }
         public static void Terminal()
         {
+            Console.WriteLine("Tipo: " + tipo);
             if (tipo == "int" || tipo=="intArray")
             {
                 if (Token.index == 37) //numero
@@ -1461,7 +1640,7 @@ namespace Compile
                 case "CP":
                     if (Token.index != 12)
                     {
-                        Console.WriteLine("Error. ) esperado.");
+                        Console.WriteLine("Error. ) esperado." + " Current token index: " + Token.index);
                     }
                     break;
                 case "[":
@@ -1498,6 +1677,7 @@ namespace Compile
                 Token.index == 7 || //for
                 Token.index == 8 || //while
                 Token.index == 9 || // print
+                Token.index == 10 || //read
                 Token.index == 41 || //printl
                 Token.index == 50;
         }
@@ -1511,12 +1691,13 @@ namespace Compile
         }
         private static bool isInstruction()
         {
-            return Token.index == 41|| //printl
+            return Token.index == 41 || //printl
                 Token.index == 9 || // print
                 Token.index == 8 || // while
                 Token.index == 7 || // for
                 Token.index == 6 || // else
-                Token.index == 5; // if
+                Token.index == 5 || // if
+                Token.index == 10; //print
 
 
         }
@@ -1549,7 +1730,7 @@ namespace Compile
             }
             return "null";
         }
-        public static void assignDirection(string name, string length)
+        public static void assignDirection(string name)
         {
             bool found = false;
             
@@ -1643,6 +1824,7 @@ namespace Compile
             Console.WriteLine("Error. Variable sin direccion.");
             return "";
         }
+
         public static string ConvertStringtoHexa(string input)
         {
             string result = "";
@@ -1751,7 +1933,7 @@ namespace Compile
 //3 float
 //4 double
 //5 if
-//6 else
+//6 else 
 //7 for
 //8 while
 //9 print
