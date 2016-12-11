@@ -1302,7 +1302,31 @@ namespace Compile
                     nextToken();
                     break;
                 case "stringArray":
-
+                    nombre = Token.valor;
+                    nextToken();
+                    Match("[");
+                    tipo = "int";
+                    BoolExpretion();
+                    tipo = "stringArray";
+                    Console.WriteLine("PUSHKI " + CheckVarTable(nombre, "length"));
+                    sc += 5;
+                    codigochilo += "17" + Int32.Parse(CheckVarTable(nombre, "length")).ToString("X4").PadLeft(8, '0'); ;
+                    Console.WriteLine("MULT");
+                    sc++;
+                    codigochilo += "3D";
+                    Match("]");
+                    Console.WriteLine("POPX");
+                    codigochilo += "20";
+                    sc++;
+                    Console.WriteLine("READAS " + nombre);
+                    lastDirection = GetDirection(nombre);
+                    if (lastDirection == "-1")
+                    {
+                        assignDirection(nombre);
+                    }
+                    codigochilo += "2F" + lastDirection;
+                    sc = sc + 3;
+                    break;
 
             }
             
