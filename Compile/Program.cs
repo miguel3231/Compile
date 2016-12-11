@@ -26,10 +26,13 @@ namespace Compile
         public static string directionSize = "0000";
         public static int[] JumpList = new int[50];
         public static string tipo = "";
+        public static bool acceptNegative = true;
+        public static int negativeCount = 0;
+        public static bool wasNumber = false; 
 
         static void Main(string[] args)
         {
-            string line = "{ double[5] a read(a[1]) print(a[1]) read(a[0]) }";
+            string line = "{int a a=-5+2--6 print(a)}";
             //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0])
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
@@ -77,9 +80,11 @@ namespace Compile
             int count = 0;
             string word = "";
             bool breakFlag = false;
+            
             char[] charArray = expression.ToCharArray();
             for (int i = 0; i < charArray.Length; i++)
             {
+                wasNumber = false;
                 //Console.WriteLine("What im reading: " + charArray[i]);
                 if (charArray[i] == ' ' || charArray[i] == ';')
                     continue;
@@ -106,14 +111,11 @@ namespace Compile
                     if (tokensArray[count].index == 50)
                         tokensArray[count].valor = word;
                     count++;
-                    Console.WriteLine("Word:" + word);
+                    //Console.WriteLine("Word:" + word);
                     word = "";
                 }
-
-
-                //Console.WriteLine("Count:" + count);
-
                 //Numbers
+                
                 else if (Char.IsNumber(charArray[i]))
                 {
                     tokensArray[count] = new Tokens(37, "");
@@ -137,8 +139,10 @@ namespace Compile
                     //tokensArray[count].index = 37;
                     tokensArray[count].valor = word;
                     count++;
-                    Console.WriteLine("Number:" + word);
+                    //Console.WriteLine("Number:" + word);
                     word = "";
+                    wasNumber = true;
+                    negativeCount = 0;
                 }
 
                 //Operadores
@@ -147,11 +151,56 @@ namespace Compile
                     tokensArray[count] = new Tokens(13, "");
                     count++;
                 }
+                
+                else if(charArray[i] == '-' && i < charArray.Length-1 && acceptNegative)
+                {
+                    if (char.IsNumber(charArray[i + 1]))
+                    {
+                        tokensArray[count] = new Tokens(37, "");
+                        word += "-";
+                        i++;
+                        while (i < charArray.Length && breakFlag == false)
+                        {
+                            //if (charArray[i] == ' ' || charArray[i] == ';')
+                            if (charArray[i] == ' ' || charArray[i] == ';' || (Char.IsNumber(charArray[i]) == false && charArray[i] != '.'))
+                            {
+                                breakFlag = true;
+                                i--;
+                            }
+                            else
+                            {
+                                word += charArray[i];
+                            }
+                            i++;
+                        }
+                        i--;
+                        breakFlag = false;
+                        tokensArray[count].index = checkNumber(word);
+                        //tokensArray[count].index = 37;
+                        tokensArray[count].valor = word;
+                        count++;
+                        //Console.WriteLine("Number:" + word);
+                        word = "";
+                        wasNumber = true;
+                        negativeCount = 0;
+                    }
+                    else
+                    {
+                        tokensArray[count] = new Tokens(14, "");
+                        count++;
+                    }
+                }
 
                 else if (charArray[i] == '-')
                 {
                     tokensArray[count] = new Tokens(14, "");
                     count++;
+                    negativeCount++;
+                    if (negativeCount == 1)
+                        acceptNegative = true;
+                    else
+                        acceptNegative = false;
+
                 }
 
                 else if (charArray[i] == '*')
@@ -371,12 +420,14 @@ namespace Compile
                     tokensArray[count] = new Tokens(51, "");
                     count++;
                 }
+                
+                if (wasNumber == true)
+                    acceptNegative = false;
+
             }
             for (int i = 0; i < count; i++)
             {
-                Console.WriteLine(tokensArray[i].index + ", " + tokensArray[i].valor);
-
-
+                //Console.WriteLine(tokensArray[i].index + ", " + tokensArray[i].valor);
             }
 
         }
@@ -443,6 +494,8 @@ namespace Compile
         public static int checkNumber(string word)
         {
             int count = 0;
+            if (word[0] == '-')
+                word = word.Substring(1);
             for (int i = 0; i < word.Length; i++)
                 if (word[i] == '.')
                     count++;
@@ -1117,7 +1170,6 @@ namespace Compile
                     nextToken();
                     Match("[");
                     tipo = "int";
-                    Console.WriteLine("tipo1  " + tipo );
                     BoolExpretion();
                     tipo = "intArray";
                     Match("]");
@@ -1180,7 +1232,6 @@ namespace Compile
                     nextToken();
                     Match("[");
                     tipo = "int";
-                    Console.WriteLine("tipo1  " + tipo);
                     BoolExpretion();
                     tipo = "doubleArray";
                     Match("]");
@@ -1212,7 +1263,6 @@ namespace Compile
                     nextToken();
                     Match("[");
                     tipo = "int";
-                    Console.WriteLine("tipo1  " + tipo);
                     BoolExpretion();
                     tipo = "charArray";
                     Match("]");
@@ -1245,7 +1295,6 @@ namespace Compile
         }
         public static void BoolExpretion()
         {
-            Console.WriteLine("Eltipo3 " + tipo);
             Comparison();
             while (Token.index == 31 || Token.index == 32)
             {
@@ -1388,7 +1437,6 @@ namespace Compile
         }
         public static void Terminal()
         {
-            Console.WriteLine("Tipo: " + tipo);
             if (tipo == "int" || tipo=="intArray")
             {
                 if (Token.index == 37) //numero
