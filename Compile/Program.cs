@@ -32,7 +32,7 @@ namespace Compile
 
         static void Main(string[] args)
         {
-            string line = "{int a a=-5+2--6 print(a)}";
+            string line = "{string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[4]) }";
             //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0])
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
@@ -644,7 +644,7 @@ namespace Compile
                         Match(",");
                         if (Token.index == 37)
                         {
-                            varTable[varCount].length = Token.valor;
+                            varTable[varCount].length = Int32.Parse(Token.valor) +1 +"" ;
                         }
                         else
                         {
@@ -944,6 +944,12 @@ namespace Compile
                     tipo = "int";
                     BoolExpretion();
                     tipo = "stringArray";
+                    Console.WriteLine("PUSHKI " + CheckVarTable(nombre,"length"));
+                    sc += 5;
+                    codigochilo += "17" + Int32.Parse(CheckVarTable(nombre, "length")).ToString("X4").PadLeft(8, '0'); ;
+                    Console.WriteLine("MULT");
+                    sc++;
+                    codigochilo += "3D";
                     Console.WriteLine("POPY");
                     codigochilo += "43";
                     sc++;
@@ -1069,6 +1075,12 @@ namespace Compile
                     tipo = "int";
                     BoolExpretion();
                     tipo = "stringArray";
+                    Console.WriteLine("PUSHKI " + CheckVarTable(nombre, "length"));
+                    sc += 5;
+                    codigochilo += "17" + Int32.Parse(CheckVarTable(nombre, "length")).ToString("X4").PadLeft(8, '0'); ;
+                    Console.WriteLine("MULT");
+                    sc++;
+                    codigochilo += "3D";
                     Match("]");
                     Console.WriteLine("POPX");
                     codigochilo += "20";
@@ -1289,6 +1301,8 @@ namespace Compile
                     codigochilo += "2A" + lastDirection;
                     nextToken();
                     break;
+                case "stringArray":
+
 
             }
             
