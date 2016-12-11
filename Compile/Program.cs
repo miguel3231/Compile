@@ -32,25 +32,13 @@ namespace Compile
 
         static void Main(string[] args)
         {
-            string line = "{string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[4]) }";
-            //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0])
+            string line = "{int a for(a=4 ; a<6 ; a=a+1){print(a)}  printl int b for(b=1; b<a;b=b+1){print(b)}}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
             CreateFile();
             RunVM();
-
-            //testing();
             Console.ReadLine();
-        }
-        public static void testing()
-        {
-            //string[5] a,4 a[0]=\"unos\" a[1]=\"doss\" a[2]=\"tres\" print(a[2]) printl print(a[1]) printl print(a[0]) //bgu
-            double d = 1;
-            Console.WriteLine("Double value: " + d.ToString());
-            byte[] bytes = ConvertDoubleToByteArray(d);
-            Console.WriteLine("Byte array value:");
-            Console.WriteLine(BitConverter.ToString(bytes));
         }
         public static byte[] ConvertDoubleToByteArray(double d)
         {
@@ -86,7 +74,7 @@ namespace Compile
             {
                 wasNumber = false;
                 //Console.WriteLine("What im reading: " + charArray[i]);
-                if (charArray[i] == ' ' || charArray[i] == ';')
+                if (charArray[i] == ' ')
                     continue;
                 if (Char.IsLetter(charArray[i]))
                 {
@@ -113,6 +101,7 @@ namespace Compile
                     count++;
                     //Console.WriteLine("Word:" + word);
                     word = "";
+                    wasNumber = true; //wasn't really a number but a variable can represent a number
                 }
                 //Numbers
                 
@@ -774,6 +763,7 @@ namespace Compile
                     }
                     codigochilo += "1C" + lastDirection;
                     //codigochilo += "\n"; //testing purposes, must die eventually
+                    //nextToken();
                 }
 
                 else if ((Token.index == 37 || Token.index == 42 || Token.index == 50 || Token.index == 11) && tipo == "float")
@@ -988,7 +978,50 @@ namespace Compile
                 Bloque();
                 Console.WriteLine("L" + LCount + ":");
                 JumpList[LCount] = sc;
-                LCount++;
+
+
+            }
+            else if (Token.index == 7) //for
+            {
+                nextToken();
+                Match("OP");
+                DoAssignment();
+                Match(";");
+
+                Console.WriteLine("L" + LCount + ":"); //L0
+                JumpList[LCount] = sc;
+                //LCount++;
+                BoolExpretion();
+                Match(";");
+
+                Console.WriteLine(JumpHelper + " L" + (LCount + 3)); //Jump L3
+                JumpWriteCode(JumpHelper);
+                codigochilo += "replace" + (LCount + 3) + "replace";
+                sc = sc + 3;
+                Console.WriteLine("JMP " + "L" + (LCount +2)); //Jump L2
+                codigochilo += 30 + "replace" + (LCount + 2) + "replace";
+                sc = sc + 3;
+
+                Console.WriteLine("L" + LCount +1 + ":"); //L1
+                JumpList[LCount+1] = sc;
+                //LCount++;
+                //BoolExpretion();
+                DoAssignment();
+                Console.WriteLine("JMP " + "L" + (LCount)); //Jump L0
+                codigochilo += 30 + "replace" + (LCount) + "replace";
+                sc = sc + 3;
+                Match(")");
+
+                Console.WriteLine("L" + LCount + 2 + ":"); //L2
+                JumpList[LCount + 2] = sc;
+                Bloque();
+                Console.WriteLine("JMP " + "L" + (LCount +1)); //Jump L1
+                codigochilo += 30 + "replace" + (LCount +1) + "replace";
+                sc = sc + 3;
+
+                Console.WriteLine("L" + LCount + 3 + ":"); //L1
+                JumpList[LCount + 3] = sc;
+                LCount = LCount + 4;
 
             }
             else if (Token.index == 8) //while
@@ -1009,7 +1042,7 @@ namespace Compile
                 sc = sc + 3;
                 Console.WriteLine("L" + (LCount + 1) + ":");
                 JumpList[LCount + 1] = sc;
-                LCount++;
+                LCount=LCount +2 ;
 
             }
             else if (Token.index == 9) //print
@@ -1702,7 +1735,7 @@ namespace Compile
                 case "OB":
                     if (Token.index != 23)
                     {
-                        Console.WriteLine("Error. { esperado. ");
+                        Console.WriteLine("Error. { esperado. " + " Current token index: " + Token.index);
                     }
                     break;
                 case "CB":
@@ -1714,13 +1747,13 @@ namespace Compile
                 case "Eq":
                     if (Token.index != 27)
                     {
-                        Console.WriteLine("Error. = esperado.");
+                        Console.WriteLine("Error. = esperado." + " Current token index: " + Token.index);
                     }
                     break;
                 case "OP":
                     if (Token.index != 11)
                     {
-                        Console.WriteLine("Error. ( esperado.");
+                        Console.WriteLine("Error. ( esperado." + " Current token index: " + Token.index);
                     }
                     break;
                 case "CP":
@@ -1745,6 +1778,12 @@ namespace Compile
                     if(Token.index !=30)
                     {
                         Console.WriteLine("Error. , esperado." + " Current token index: " + Token.index);
+                    }
+                    break;
+                case ";":
+                    if(Token.index !=28)
+                    {
+                        Console.WriteLine("Error. ; esperado." + " Current token index: " + Token.index + ", " + Token.valor);
                     }
                     break;
             }
