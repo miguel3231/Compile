@@ -22,3 +22,5 @@ C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.pdb
 C:\Users\Mike\Documents\GitHub\Compile\Compile\bin\Debug\Compile.exe
 C:\Users\Mike\Documents\GitHub\Compile\Compile\bin\Debug\Compile.pdb
 C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.csprojResolveAssemblyReference.cache
+C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.Form1.resources
+C:\Users\Mike\Documents\GitHub\Compile\Compile\obj\Debug\Compile.csproj.GenerateResource.Cache

@@ -28,11 +28,13 @@ namespace Compile
         public static string tipo = "";
         public static bool acceptNegative = true;
         public static int negativeCount = 0;
-        public static bool wasNumber = false; 
+        public static bool wasNumber = false;
+        public static string rice;
 
         static void Main(string[] args)
         {
-            string line = "{int a for(a=4 ; a<6 ; a=a+1){print(a)}  printl int b for(b=1; b<a;b=b+1){print(b)}}";
+            Console.WriteLine(rice = "caca");
+            string line = "{int a \n for(a=4 ; a<6 ; a=a+1){print(a)}  printl int b for(b=1; b<a;b=b+1){print(b)}}";
             Console.WriteLine("Evaluate: " + line);
             evaluate(line);
             Programa();
@@ -68,13 +70,12 @@ namespace Compile
             int count = 0;
             string word = "";
             bool breakFlag = false;
-            
             char[] charArray = expression.ToCharArray();
             for (int i = 0; i < charArray.Length; i++)
             {
                 wasNumber = false;
-                //Console.WriteLine("What im reading: " + charArray[i]);
-                if (charArray[i] == ' ')
+                Console.WriteLine("What im reading: " + charArray[i]);
+                if (charArray[i] == ' ' || charArray[i] == '\n')
                     continue;
                 if (Char.IsLetter(charArray[i]))
                 {
@@ -416,7 +417,7 @@ namespace Compile
             }
             for (int i = 0; i < count; i++)
             {
-                //Console.WriteLine(tokensArray[i].index + ", " + tokensArray[i].valor);
+                Console.WriteLine(tokensArray[i].index + ", " + tokensArray[i].valor);
             }
 
         }
